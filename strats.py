@@ -5,7 +5,8 @@ class Stratification:
         self.buckets = buckets
         self.stratified_tape = None
         self.stratified_tape = self.stratify()
-        self.stratified_tape = self.stratify()
+    
+    
 
     def _get_lowest_bucket(self, precision=2):
         x = self.tape[self.variable].min()
