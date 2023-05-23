@@ -1,0 +1,128 @@
+FieldName,DataDesc,DataCategory,DataType,Description,PossibleValues,DefaultValue,StratFlag,StratType,GenericLoan,Required,Consumer,Required,ConsumerMortgage,Required,ConsumerAuto,Required,ConsumerStudent,Required,ConsumerCard,Required,ConsumerUnsecured,Required,CommercialLoan,Required,CommercialLoan,Required,CommercialAmortizing,Required,CommercialBullet,Required,CommercialRevolver,Required,CommercialABL,Required,,,
+loanid,Unique ID,strs,str,Unique identifier for each loan or lease asset,,,N,None,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+sector,Categorical,strs,str,CFE specific variable which triggers object type.  ,"consumer_mortgage, consumer_auto, consumer_student, cosnumer_card, consumer_unsecured, commercial_mortgage, commercial_amortizing, commercial_bullet, commercial_revolver, commercial_abl_revolver, commercial_abl_fixed",,Y,UniqueValue,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,CFGroup
+productdesc,Categorical,strs,str,,,,Y,UniqueValue,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,AssetType
+modeldesc,Categorical,strs,enum,Descriptor for specific credit and prepayment model to be used.  NOT CURRENTLY ACTIVE,[Not Active],,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+origdate,Date,dates,datetime.date,,,,Y,VintageQ,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,," 'poolid',",,AssetOwner
+matdate,Date,dates,datetime.date,,,,N,None,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,," 'loantype',",,ProductType
+cutoffdate,Date,dates,datetime.date,,,,N,None,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,Grade
+origterm,Numeric,int,np.int64,,,,Y,UniqueValue,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,OrigNetInvest
+loanage,Numeric,int,np.int64,,,,Y,BucketRange,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,OrigRec
+remterm,Numeric,int,np.int64,,,,Y,BucketRange,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,OrigResid
+origbal,Numeric,floats,np.float64,,,,Y,BucketRange,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,OrigIDC
+currbal,Numeric,floats,np.float64,,,,Y,BucketRange,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,PmtType
+pmt,Numeric,floats,np.float64,,,,N,None,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,CollType
+intrate_type,Categorical,strs,str,,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,RegPmt
+intcompound_type,Categorical,strs,str,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,RegPmtType
+daycount_type,Categorical,strs,str,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,RegPmtRate
+curr_rate,Numeric,floats,np.float64,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,RegPmtPds
+promo_margin,Numeric,floats,np.float64,,,,Y(E),,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,AdvPmtAmt
+io_margin,Numeric,floats,np.float64,,,,Y(E),,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,AdvPmtNum
+rate_margin,Numeric,floats,np.float64,,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,AdvPmtType
+rate_index,Categorical,strs,str,,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,SeasonalPmt
+rate_index_initvalue,Numeric,floats,np.float64,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,PromoPmt
+floatrate_fixterm,Numeric,ints,np.int64,,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,SuppProductFlag
+floatrate_initresetdate,Date,dates,datetime.date,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,SuppCharge
+floatrate_lastresetdate,Date,dates,datetime.date,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,LoanAge
+floatrate_nextresetdate,Date,dates,datetime.date,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,RemCash
+floatrate_resetfreq,Categorical,strs,str,,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,CurrNetInvest
+__floatrate_resetsubfreq,Numeric,ints,np.int64,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,CurrRec
+floatrate_lookback,Numeric,ints,np.int64,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,CurrResid
+floatrate_cap1,Numeric,floats,np.float64,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,CurrIDC
+floatrate_floor1,Numeric,floats,np.float64,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,DaysDQ
+floatrate_period1,Numeric,ints,np.int64,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,TimeInBusiness
+floatrate_cap2,Numeric,floats,np.float64,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,BorrowerIncome
+floatrate_floor2,Numeric,floats,np.float64,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,IndustryCode
+amortterm,Numeric,ints,np.int64,,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,OrigChannel
+amortsched,Numeric,arrays,,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+promoterm,Numeric,ints,np.int64,,,,Y(E),,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+ioterm,Numeric,ints,np.int64,,,,Y(E),,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+pmtfreq,Categorical,strs,str,,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+pmtsched,Date,arrays,,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+firstpaydate,Date,dates,datetime.date,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+schedpmtdates,Date,arrays,,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+prepaypenalty,Numeric,floats,np.float64,,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+lastpaydate,Date,dates,datetime.date,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+lastduedate,Date,dates,datetime.date,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+nextpaydate,Date,dates,datetime.date,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+dqstatus,Categorical,ints,np.int64,NOTE: Consider ENUM,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+accrued_int,Numeric,floats,np.float64,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+accrued_fees,Numeric,floats,np.float64,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+port_group1,,strs,str,,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+port_group2,,strs,str,,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+port_group3,,strs,str,,,,Y,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+flag_runcf,Flag (True / Flase),bools,np.bool_,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+data_integrity,Flag (True / Flase),bools,np.bool_,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+type_integrity,Flag (True / Flase),bools,np.bool_,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+paydate_calc,Flag (True / Flase),bools,np.bool_,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+rateget_calc,Flag (True / Flase),bools,np.bool_,,,,N,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+origfico,Numeric,ints,np.int64,,,,Y(E),,FALSE,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+origfico_borrower2,Numeric,ints,np.int64,,,,N,,FALSE,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+currfico,Numeric,ints,np.int64,,,,Y(E),,FALSE,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+currfico_date,Date,dates,datetime.date,,,,N,,FALSE,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+currfico_borrower2,Numeric,ints,np.int64,,,,N,,FALSE,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+currfico_date_borrower2,Date,dates,datetime.date,,,,N,,FALSE,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+state,Categrical,strs,str,,,,Y,,FALSE,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+zip,Categrical,strs,str,,,,N,,FALSE,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+state_borrwer2,Categrical,strs,str,,,,N,,FALSE,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+zip_borrower2,Categrical,strs,str,,,,N,,FALSE,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+doctype,Categrical,strs,enum,Type of documentation used at underwriting.  Referrs to income and employment verification if non-mortgage,"MTG: full, low, none; CONS: : full, inc, emp, none",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+credit_grade,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+oltv,Numeric,floats,,Loan to Value ratio as of ORIGDATE equal to PROP_APPRAISAL / ORIGBAL,,,Y(E),,,,,,TRUE,,TRUE,,FALSE,,FALSE,,TRUE,,,,,,,,,,,,,,,,
+odti,Numeric,floats,,Debt to Income ratio as of ORIGDATE equal to PMT / INC_VER,,,Y(E),,,,,,TRUE,,TRUE,,FALSE,,FALSE,,TRUE,,,,,,,,,,,,,,,,
+lien2_loanid,ID Cross Reference,strs,,LOANID for second lien reflected in CUMORIGBAL,,,N,,,,,,TRUE,,FALSE,,TRUE,,FALSE,,TRUE,,,,,,,,,,,,,,,,
+lien2_origbal,Numeric,floats,,ORIGBAL for second lien reflected in CUMORIGBAL,,,N,,,,,,TRUE,,FALSE,,TRUE,,FALSE,,TRUE,,,,,,,,,,,,,,,,
+lien2_loantype,Categorical,strs,,??? for second lien reflected in ,,,N,,,,,,TRUE,,FALSE,,TRUE,,FALSE,,TRUE,,,,,,,,,,,,,,,,
+cumorigbal,Numeric,floats,,,,,Y(E),,,,,,TRUE,,TRUE,,TRUE,,TRUE,,TRUE,,,,,,,,,,,,,,,,
+pmt_ti,Numeric,floats,,Periodic Tax and Insurance payment due ,,,N,,,,,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+esc_currbal,Numeric,floats,,,,,Y(E),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+esc_advtype,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+esc_advbal,Numeric,floats,,,,,Y(E),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+svc_advtype,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+svc_advbal_rec,Numeric,floats,,,,,Y(E),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+svc_advbal_norec,Numeric,floats,,,,,Y(E),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+svc_tp_advbal_rec,Numeric,floats,,,,,Y(E),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+svc_name,Categorical,strs,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+svc_feetype,Categorical,strs,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+svc_grossfee,Numeric ,floats,,,,,Y(E),,,,,,,,,,,,,,,,,,,,,,,," 'aus_decision',",,,,,,
+svc_netfee,Numeric ,floats,,,,,Y(E),,,,,,,,,,,,,,,,,,,,,,,," 'dq_string',",,,,,,
+svc_gteefee,Numeric ,floats,,,,,Y(E),,,,,,,,,,,,,,,,,,,,,,,," 'dqstatus',",,,,,,
+ptrate,Numeric ,floats,,,,,Y(E),,,,,,,,,,,,,,,,,,,,,,,," 'doctype',",,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+prop_appraisal,Numeric ,floats,,Property appraisal / value as of ORIGDATE,,,Y(E),,,,,,TRUE,,TRUE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+prop_zip,Categorical,strs,,Zip code where property is located,,,N,,,,,,TRUE,,TRUE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+prop_zip4,Categorical,strs,,+4 of zip code where property is located,,,N,,,,,,TRUE,,TRUE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+prop_type,Categorical,strs,,,,,Y(E),,,,,,TRUE,,FALSE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+prop_units,Categorical,strs,,,,,Y(E),,,,,,TRUE,,FALSE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+prop_occtype,Categorical,strs,,,,,Y(E),,,,,,TRUE,,FALSE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+prop_purposetype,Categorical,strs,,,,,Y(E),,,,,,TRUE,,TRUE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+lientype,Numeric ,ints,,,,,Y(E),,,,,,TRUE,,TRUE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+prop_value,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+prop_value_date,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+prop_make,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+prop_model,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+prop_year,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+bk_status,,,,,,,,,,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+bk_type,,,,,,,,,,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+bk_startdate,,,,,,,,,,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+bk_disdate,,,,,,,,,,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+fc_status,,,,,,,,,,,,,TRUE,,TRUE,,,,,,,,,,,,,,,,,,,,,,
+fc_startdate,,,,,,,,,,,,,TRUE,,TRUE,,,,,,,,,,,,,,,,,,,,,,
+fc_saledate,,,,,,,,,,,,,TRUE,,TRUE,,,,,,,,,,,,,,,,,,,,,,
+fc_salevalue,,,,,,,,,,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+mod_startdate,,,,,,,,,,,TRUE,,,,,,,,,,,,,,,,,,,,,,,,,,
+mod_type,,,,,,,,,,,,,TRUE,,FALSE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+ins_company_code,,,,,,,,,,,,,TRUE,,FALSE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+ins_company,,,,,,,,,,,,,TRUE,,FALSE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+ins_flag,,,,,,,,,,,,,TRUE,,FALSE,,FALSE,,FALSE,,FALSE,,,,,,,,,,,,,,,,
+ins_coverage,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+ins_charge,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+ins_charge_type,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

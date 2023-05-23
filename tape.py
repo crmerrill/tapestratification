@@ -12,12 +12,12 @@ import CFEngine.assets.assetvars as assetvars
 from IPython.display import HTML, display
 
 class Tape:
-    required_fields =
 
     def __init__(self, tape_file, tape_prep='raw', **kwargs):
         if sysutils.validate_data_file_name(tape_file) is False:
             raise Exception('Invalid tape file')
         else:
+            #self._config_data = kwargs.get('config_data') if kwargs.get('config_data') is not None else 
             self.tape_file = tape_file
             self.tape_prep = tape_prep
             self.cut_off_date = kwargs.get('cut_off_date') if kwargs.get('cut_off_date') is not None else dt.date.today()
@@ -29,22 +29,18 @@ class Tape:
                 self.tape_data = self._import_clean_tape(tape_file, kwargs)
             else:
                 self.tape_data = self._import_raw_tape(tape_file, kwargs)
-
-
-
+            self.tape_data = self.tape_data.reset_index()
             self.tape_data = self.tape_data.set_index('loanid')
             self.tape_data = self.tape_data.sort_index()
-            self.tape_data = self.tape_data.fillna(0)
+            self.tape_data = self.tape_data.replace('nan', np.nan)
             self.tape_data = self.tape_data.replace('NA', np.nan)
             self.tape_data = self.tape_data.replace('N/A', np.nan)
             self.tape_data = self.tape_data.replace('N\\A', np.nan)
-            self.tape_data = self.
             self.fields = None
 
 
     def __repr__(self):
         return display(self.tape_data)
-
 
 
     def _import_raw_tape(self, tape_file, **kwargs):
@@ -54,8 +50,10 @@ class Tape:
             self.tape_data = pd.read_csv(self.tape_file, delimiter=kwargs.get('delimiter'), dtype=kwargs.get('dtype'))
         elif tape_file.endswith('.xlsx'):
             self.tape_data = pd.read_excel(self.tape_file, sheet_name=kwargs.get('sheet_name'), dtype=kwargs.get('dtype'))
+        #TODO: Implement SQL input
         else:
             raise Exception('Unsupported input type.  Use flat file format, MSExcel format, or SQL query')
+        
         if kwargs.get('header_map') is not None:
             if type(kwargs.get('header_map')) == dict:
                 self.tape_data = self.tape_data.rename(columns=kwargs.get('header_map'))
@@ -71,17 +69,9 @@ class Tape:
             else:
                 raise Exception('Unsupported header file input.  Header must be dictionary or flat file format')
         else:
-            pass
-        try:
-            for field in required_fields
-                assert field in self.tape_data.columns
-            return self
-        except AssertionError:
-            raise ValueError('Required field missing from tape_data')
+            pass    
+        return self
 
-
-    def _check_required_fields(self, required_fields):
-        pass
 
     def _get_unique_values(self):
         unique_values = {}
@@ -128,10 +118,19 @@ class Tape:
 
 
     #Utilites for processing tape_data to a fully formatted tape_data for cashflow engine use
+    def _check_required_fields(self, config_data):
+        for field in config_data.required_fields:
+            if field not in self.tape_data.columns:
+                print(f'Required field {field} is not contained in data tape.  Please check data tape fields')
+                return False
+            else:
+                pass
+        return True
+        
     @staticmethod
     def _parse_tape_dates(var, dt_format='%Y%m%d'):
         if var == None or pd.isnull(var) or var == '':
-            return None
+            return np.nan
         elif type(var) != str:
             var = str(var)
         else:
@@ -139,7 +138,7 @@ class Tape:
         return dt.datetime.strptime(var, dt_format).date()
 
     @staticmethod
-    def _get_converter_dict(groups=('ints', 'floats', 'arrays', 'bools')):
+    def _get_converter_dict(groups=('ints', 'floats', 'arrays', 'bools'), config_file):
         arraydict = {
             'amortsched': _read_dates_to_array,
             'pmtsched': _read_dates_to_array,
@@ -147,7 +146,7 @@ class Tape:
         }
         convertdict = {}
         for grp in groups:
-            for var in getattr(assetvars, grp):
+            for var in getattr(config_file, grp):
                 if grp == 'arrays' and var in arraydict.keys():
                     convertdict[var] = arraydict[var]
                 else:
@@ -247,13 +246,18 @@ class Tape:
                 del element
         return ramp_array
 
-    def process_tape(self):
-        for variable in assetvars:
-            if variable in self.tape_data.columns:
-                self.tape_data[variable] = self.tape_data[variable].apply(self.converter_dict[variable])
-            else:
-                pass
-        return self.tape_data
+    def process_tape(self, config_data):
+        if self._check_required_fields(config_data) is True:
+            for variable in config_data:
+                if variable in self.tape_data.columns:
+                    self.tape_data[variable] = self.tape_data[variable].apply(self.converter_dict[variable])
+                else:
+                    pass
+            return self.tape_data
+        else:
+            print('Can not porcess tape without required fields.  Please check tape fields and retry')
+            return False 
+        
 
     def _import_clean_tape(self, tape_file, input_type='csv', delimiter=None, sheet_name=None):
         # look at whether we are getting tape_data from flatfile or SQL.
