@@ -7,43 +7,49 @@ import numpy as np
 import pandas as pd
 sys.path.append('/Users/crmerrill/lib')
 import CFEngine.cmutils.sysutils as sysutils
-#TODO: need to fix this import
-import CFEngine.assets.assetvars as assetvars
+import assetvars_new as assetvars
 from IPython.display import HTML, display
 
 class Tape:
 
     def __init__(self, tape_file, tape_prep='raw', **kwargs):
-        if sysutils.validate_data_file_name(tape_file) is False:
-            raise Exception('Invalid tape file')
-        else:
-            #self._config_data = kwargs.get('config_data') if kwargs.get('config_data') is not None else 
-            self.tape_file = tape_file
-            self.tape_prep = tape_prep
-            self.cut_off_date = kwargs.get('cut_off_date') if kwargs.get('cut_off_date') is not None else dt.date.today()
-            self.modify_date = dt.date.today()
-            self.tape_data = None
-            if not os.path.exists(self.tape_file):
-                raise FileNotFoundError('Tape file not found')
-            elif tape_prep == 'clean':
-                self.tape_data = self._import_clean_tape(tape_file, kwargs)
+        try:
+            if sysutils.validate_data_file_name(tape_file) is False:
+                msg = 'Invalid tape file'
+                raise Exception('Invalid tape file')
             else:
-                self.tape_data = self._import_raw_tape(tape_file, kwargs)
-            self.tape_data = self.tape_data.reset_index()
-            self.tape_data = self.tape_data.set_index('loanid')
-            self.tape_data = self.tape_data.sort_index()
-            self.tape_data = self.tape_data.replace('nan', np.nan)
-            self.tape_data = self.tape_data.replace('NA', np.nan)
-            self.tape_data = self.tape_data.replace('N/A', np.nan)
-            self.tape_data = self.tape_data.replace('N\\A', np.nan)
-            self.fields = None
+                #self._config_data = kwargs.get('config_data') if kwargs.get('config_data') is not None else
+                self.tape_file = tape_file
+                self.tape_prep = tape_prep
+                self.cut_off_date = kwargs.get('cut_off_date') if kwargs.get('cut_off_date') is not None else dt.date.today()
+                self.modify_date = dt.date.today()
+                self.tape_data = None
+                if not os.path.exists(self.tape_file):
+                    msg = 'Tape file not found'
+                    raise FileNotFoundError('Tape file not found')
+                elif tape_prep == 'clean':
+                    self.tape_data = self.import_clean_data(tape_file, kwargs)
+                else:
+                    self.tape_data = self.import_raw_data(tape_file, kwargs)
+                self.tape_data = self.tape_data.reset_index()
+                self.tape_data = self.tape_data.set_index('loanid')
+                self.tape_data = self.tape_data.sort_index()
+                self.tape_data = self.tape_data.replace('nan', np.nan)
+                self.tape_data = self.tape_data.replace('NA', np.nan)
+                self.tape_data = self.tape_data.replace('N/A', np.nan)
+                self.tape_data = self.tape_data.replace('N\\A', np.nan)
+                self.fields = self.tape_data.columns()
+                self.asset_types = self.tape_data['sector'].unique()
+        except (Exception, FileNotFoundError):
+            print(msg)
+            return None
 
 
     def __repr__(self):
         return display(self.tape_data)
 
 
-    def _import_raw_tape(self, tape_file, **kwargs):
+    def import_raw_data(self, tape_file, **kwargs):
         if tape_file.lower().endswith('.csv'):
             self.tape_data = pd.read_csv(self.tape_file, dtype=kwargs.get('dtype'))
         elif tape_file.lower().endswith('.tsv') or tape_file.lower.endswith('.txt'):
@@ -51,9 +57,12 @@ class Tape:
         elif tape_file.endswith('.xlsx'):
             self.tape_data = pd.read_excel(self.tape_file, sheet_name=kwargs.get('sheet_name'), dtype=kwargs.get('dtype'))
         #TODO: Implement SQL input
+        #elif tape_file.beginwith('sql_query='):
+        #    self.tape_data = pd.read_sql(tape_file, kwargs.get('sql_connection'), dtype=kwargs.get('dtype'), index_col='loanid', \
+        #                             parse_dates=kwargs.get('parse_dates'), columns=kwargs.get('columns')))
         else:
+            msg = 'Unsupported input type.  Use flat file format, MSExcel format, or SQL query'
             raise Exception('Unsupported input type.  Use flat file format, MSExcel format, or SQL query')
-        
         if kwargs.get('header_map') is not None:
             if type(kwargs.get('header_map')) == dict:
                 self.tape_data = self.tape_data.rename(columns=kwargs.get('header_map'))
@@ -67,6 +76,7 @@ class Tape:
                 header_map = pd.read_excel(kwargs.get('header_map'), header=0, index_col=0, sheet_name=kwargs.get('sheet_name')).to_dict()['mapped_field']
                 self.tape_data = self.tape_data.rename(columns=header_map)
             else:
+                msg = 'Unsupported header file input.  Header must be dictionary or flat file format'
                 raise Exception('Unsupported header file input.  Header must be dictionary or flat file format')
         else:
             pass    
@@ -116,6 +126,21 @@ class Tape:
             'unique_values': self._get_unique_values()
         })
 
+    # TODO create the following methods:
+    def transform_variable(self, variable, transformation):
+        pass
+
+    def fill_missing_values(self, variable, treatment):
+        pass
+
+    def encode_variable(self, variable, encoding_dict):
+        pass
+
+    def create_variable(self, variable, treatment):
+        pass
+
+    def drop_variable(self, variable):
+        pass
 
     #Utilites for processing tape_data to a fully formatted tape_data for cashflow engine use
     def _check_required_fields(self, config_data):
@@ -259,7 +284,7 @@ class Tape:
             return False 
         
 
-    def _import_clean_tape(self, tape_file, input_type='csv', delimiter=None, sheet_name=None):
+    def import_clean_data(self, tape_file, input_type='csv', delimiter=None, sheet_name=None):
         # look at whether we are getting tape_data from flatfile or SQL.
         if input_type is None:
             input_type = tape_file.split('.')[-1].lower()
@@ -301,15 +326,3 @@ class Tape:
 
             return self
 
-    #TODO create the following methods:
-    def transform_variable(self, variable, transformation):
-        pass
-
-    def fill_missing_values(self, variable, treatment):
-        pass
-
-    def encode_variable(self, variable, encoding_dict):
-        pass
-
-    def create_variable(self, variable, treatment):
-        pass

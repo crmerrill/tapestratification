@@ -80,3 +80,17 @@ class Stratification:
                 bottom_bucket = self._get_lowest_bucket()
                 step_size = (top_bucket - bottom_bucket) / max_buckets
                 return [bottom_bucket + step_size * i for i in range(max_buckets + 1)]
+
+
+
+
+        def summary_package(self, **kwargs):
+            """
+            Returns a JSON object containing stratified summary tables for each variables specified
+            in the stratify_by parameter. If no variable is specified then all available stratification
+            tables are generated.
+            :optional parameters:
+                stratify_by: list of variables to stratify by if not specified will use all available variables
+                output_type: 'raw_json', 'excel', or 'pdf'
+            :return: JSON object containing stratified summary tables for each variables specified
+            """
