@@ -142,6 +142,18 @@ class Stratification:
         self.stratify()
 
 
+    # def reload_tape(self, tape):
+    #     self.tape = tape
+    #     self.tape_consumer_mortgage = tape[tape['productdesc'] == 'consumer_mortgage'].set_index('loanid', inplace=True)
+    #     self.tape_consumer_heloc = tape[tape['productdesc'] == 'consumer_heloc'].set_index('loanid', inplace=True)
+    #     self.tape_consumer_servicing = tape[tape['productdesc'] == 'consumer_servicing'].set_index('loanid', inplace=True)
+    #     self.tape_consumer_auto = tape[tape['productdesc'] == 'consumer_auto'].set_index('loanid', inplace=True)
+    #     self.tape_consumer_student = tape[tape['productdesc'] == 'consumer_student'].set_index('loanid', inplace=True)
+    #     self.tape_consumer_card = tape[tape['productdesc'] == 'consumer_card'].set_index('loanid', inplace=True)
+    #     self.tape_consumer_unsecured = tape[tape['productdesc'] == 'consumer_unsecured'].set_index('loanid', inplace=True)
+    #     self.stratify()
+
+
     def strat_summary(self, stratification_variable: str, stratification_buckets: list = None) -> pd.DataFrame:
         if stratification_variable in self.tape.columns and stratification_buckets is None:
             stratification_buckets = bucketize_data(self.tape, stratification_variable)
