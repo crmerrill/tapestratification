@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 import pathlib
 import contextlib
-import assetvars_new as assetvars
+import varsconfig as assetvars
 
 class TestAssetvarsConfig(unittest.TestCase):
     def setUp(self):

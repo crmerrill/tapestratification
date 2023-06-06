@@ -5,17 +5,18 @@ import csv
 from functools import cached_property
 
 
-class AssetVariables(object):
+class AssetVariableConfig(object):
 
     required_config_fields = {'FieldName': (str, None),
                               'DataDesc': (str, ('categorical', 'numeric', 'date')), 
                               'DataCategory': (str, ('strs', 'floats', 'ints', 'dates', 'bools', 'arrays')), 
-                              'DataType': (str, ('str', 'enum', 'datetime.date', 'np.int64', 'np.float64', 'bool')),
+                              'DataType': (str, ('str', 'enum', 'datetime.date', 'int', 'np.int64', 'float', 'np.float64', 'bool')),
                               'Description': (str, None), 
                               'PossibleValues': (str, None),
                               'DefaultValue': (str, None), 
                               'StratFlag': (str, ('y', 'y(e)', 'n')), 
-                              'StratType': (str, ('none', 'bucketfixed', 'bucketauto', 'uniquevalue', 'vintagem', 'vintageq', 'vintagea')), 
+                              'StratType': (str, ('none', 'bucketfixed', 'bucketauto', 'uniquevalue', 'vintagem', 'vintageq', 'vintagea')),
+                              'StratSummSet': (str, ('summary', 'summary_extended', 'servicing', 'performance', 'utilization')),
                               'GenericLoan': (bool, (True, False)), 
                               'ConsumerLoan': (bool, (True, False)),
                               'ConsumerMortgage': (bool, (True, False)),
@@ -34,7 +35,7 @@ class AssetVariables(object):
     
     required_config_field_number = 35
 
-    
+
     @staticmethod
     def _check_escape(_input):
         if type(_input) == str:
@@ -45,8 +46,128 @@ class AssetVariables(object):
             return True
         else:
             return False
-    
-    
+
+    @staticmethod
+    def _convert_dates(var, dt_format='%Y-%m-%d'):
+        if var is None or pd.isnull(var) or var == '':
+            return np.nan
+        elif type(var) != str:
+            var = str(var)
+        else:
+            pass
+        return datetime.datetime.strptime(var, dt_format).date()
+
+    @staticmethod
+    def _convert_ints(var, int_type=np.int64):
+        if type(var) in (str, object):
+            if var == '':
+                newvar = np.nan
+            else:
+                if var.endswith('%'):
+                    newvar = int_type(np.round(np.float64(var.replace(',', '').replace('%', '')) * 100, 0))
+                elif var.startswith('$'):
+                    newvar = int_type(np.round(np.float64(var.replace(',', '').replace('$', '')) * 100, 0))
+                else:
+                    newvar = int_type(var.replace(',', ''))
+        elif type(var) in (float, np.float64):
+            newvar = int_type(np.round(var, 0))
+        elif type(var) == NoneType:
+            newvar = np.nan
+        else:
+            newvar = np.int_type(var)
+        return newvar
+
+    @staticmethod
+    def _convert_floats(var, float_type=np.float64):
+        if type(var) in (str, object):
+            if var == '':
+                newvar = np.nan
+            else:
+                newvar = float_type(var.replace(',', ''))
+        elif type(var) == NoneType:
+            newvar = np.nan
+        else:
+            newvar = np.float_type(var)
+        return newvar
+
+    @staticmethod
+    def _convert_bools(var):
+        if type(var) in (str, object):
+            if var.lower() in ('true', 'yes', 'y', 't', '1'):
+                return True
+            elif var.lower() in ('false', 'no', 'n', 'f', '0'):
+                return False
+            else:
+                return False
+        elif type(var) is bool:
+            return var
+        elif type(var) is int:
+            if var == 1:
+                return True
+            elif var == 0:
+                return False
+            else:
+                return False
+        elif type(var) is float:
+            if var == 1.0:
+                return True
+            elif var == 0.0:
+                return False
+            else:
+                return False
+        else:
+            return False
+
+    @staticmethod
+    def _read_dates_to_array(date_string, **kwargs):
+        dt_format = '%Y-%m-%d' if kwargs.get('dt_format') is None else kwargs.get('dt_format')
+        dt_delim = ';' if kwargs.get('dt_delim') is None else kwargs.get('dt_delim')
+        dt_type = datetime.date if kwargs.get('dt_type') is None else kwargs.get('dt_type')
+        dt_parser = lambda x: (AssetVariableConfig._convert_dates(x, dt_format)
+                               if kwargs.get('dt_parser') is None else kwargs.get('dt_parser')(x, dt_format))
+        return np.array([dt_parser(element.strip()) for element in date_string.split(dt_delim)], dtype=dt_type)
+
+    @staticmethod
+    def _read_ramp_to_array(ramp_string):
+        ramp_array = np.empty(0)
+        ramp_string = ramp_string.replace(';', ',')
+        for element in ramp_string.split(','):
+            if 'ramp' in element and 'for' in element:
+                subramp = element.replace('ramp', ',').replace('for', ',').split(',')
+                for i in range(len(subramp)):
+                    subramp[i] = float(subramp[i])
+                ramp_array = np.append(ramp_array,
+                                       np.arange(subramp[0], subramp[1] + ((subramp[1] - subramp[0]) / subramp[2]),
+                                                 (subramp[1] - subramp[0]) / subramp[2]))
+                del subramp
+                del element
+            elif 'ramp' in element and 'for' not in element:
+                subramp = element.replace('ramp', ',').split(',')
+                for i in range(len(subramp)):
+                    subramp[i] = float(subramp[i])
+                ramp_array = np.append(ramp_array, np.arange(subramp[0], subramp[1] + ((subramp[1] - subramp[0]))))
+                del subramp
+                del element
+            elif 'for' in element:
+                subramp = element.split('for')
+                ramp_array = np.append(ramp_array, np.ones(int(subramp[1])) * float(subramp[0]))
+                del subramp
+                del element
+            else:
+                ramp_array = np.append(ramp_array, float(element))
+                del element
+        return ramp_array
+
+
+    # TODO: REWRITE: ramp_to_array should handle dates and regular array expressions.  \
+    #               Dates need to be integrated into the array converter vs. being separate converter.
+    array_converters = {'pmt_sched_amort': _read_ramp_to_array,
+                        'pmt_sched': _read_ramp_to_array,
+                        'pmt_sched_dates': _read_dates_to_array,
+                        'pmt_draw_sched': _read_ramp_to_array,
+                        'pmt_draw_sched_dates': _read_dates_to_array}
+
+
     def __init__(self, config_file=None):
         #Configueration Meta Data
         self.config_file = config_file
@@ -59,6 +180,7 @@ class AssetVariables(object):
         self.floats = []
         self.arrays = []
         self._type_dict = {}
+        self._converter_dict = {}
         self.base_fields = []
         self.consumer_fields = []
         self.consumer_mortgage_fields = []
@@ -104,7 +226,7 @@ class AssetVariables(object):
             print(msg)
             return False
         except AssertionError:
-            if type(row(required_field)) != AssetVariables.required_config_fields[required_field][0]:
+            if type(row[required_field]) != AssetVariables.required_config_fields[required_field][0]:
                 print(f'Value in {required_field} on config file row {i} is not correct data type.')
                 return False
             elif row[required_field] not in AssetVariables.required_config_fields[required_field][1]:
@@ -121,11 +243,16 @@ class AssetVariables(object):
             for row in iter(csv.DictReader(csvfile, header, delimiter = ',')):
                 field_name = row['FieldName'].strip().lower()
                 self.field_required[field_name] = bool(row['Required'])
-                if row['DataType'].strip().lower() in AssetVariables.required_config_fields['DataType'][1]:
+                if row['DataType'].strip().lower() in AssetVariablesConfig.required_config_fields['DataType'][1]:
                     self._type_dict[field_name] = eval(row['DataType'].strip().lower())
                 else:
                     self._type_dict[field_name] = None
-                getattr(self, row['DataCategory'].strip().lower()).append(field_name)
+                if field_name in AssetVariableConfig.array_converters.keys():
+                    self._converter_dict[field_name] = AssetVariableConfig.array_converters[field_name]
+                elif row['DataType'].strip().lower() in AssetVariableConfig.required_config_fields['DataType'][1]:
+                    self._converter_dict[field_name] = eval(str('_convert_' + str(row['DataCategory']).strip().lower()))
+                else:
+                    self._converter_dict[field_name] = None
                 if row['StratFlag'].strip().lower() in ('y', 'y(e)'):
                     self.stratification_fields[field_name] = \
                         (row['StratFlag'].strip().lower(), row['StratType'].strip().lower())
@@ -150,7 +277,7 @@ class AssetVariables(object):
         return self
 
 
-    def var_type(self, variable_name):
+    def variable_type(self, variable_name):
         if self._type_dict[variable_name] is not None:
             return self._type_dict[variable_name]
         elif variable_name in self.strs:
@@ -169,7 +296,17 @@ class AssetVariables(object):
             return None
 
 
+    @property
+    def variables(self):
+        return self.strs + self.dates + self.bools + self.ints + self.floats + self.arrays
+
 
     @property
-    def all_fields(self):
-        return self.strs + self.dates + self.bools + self.ints + self.floats + self.arrays
+    def converter_dict(self, variable_name=None):
+        if variable_name is not None:
+            return self._converter_dict[variable_name]
+        else:
+            return self._converter_dict
+
+
+
