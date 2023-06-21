@@ -8,7 +8,7 @@ from CFEngine.cmutils.mathutils import round_to_nearest
 
 
 def weighted_average_factory(**kwargs):
-    weights = kwargs.get('weights').copy()
+    weights = kwargs.get('weights').copy()Wah
     zero_values = kwargs.get('zeros')
     rounding = kwargs.get('rounding')
     output_type = kwargs.get('output_type')
