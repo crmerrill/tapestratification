@@ -7,8 +7,7 @@ import CFEngine.cmutils.sysutils as sysutils
 import varsconfig as config
 from IPython.display import HTML, display
 
-
-def import_raw_tape(tape_file_path: str, header_map: (str, dict) = None, **kwargs) -> pd.DataFrame:
+def import_raw_data(tape_file_path: str, header_map: (str, dict) = None, **kwargs) -> pd.DataFrame:
     """
     Import raw tape file of multiple format types into a pandas dataframe, with option to remap header names.
     :param str tape_file_path: path to tape file.  File type can be csv, tsv, txt, xlsx, xls, or sql_query=<query>.
@@ -168,7 +167,7 @@ def check_required_fields(data_tape: pd.DataFrame, config_data: config.AssetVari
 
 
 def process_to_clean_tape(data_tape, config_data):
-    if check_required_fields(data_tape, config_data) is True:
+    if check_required_fields(data_tape, config_data)[0] is True:
         for variable in config_data:
             if variable in self.tape_data.columns:
                 self.tape_data[variable] = self.tape_data[variable].apply(self._converter_dict[variable])
@@ -213,23 +212,41 @@ def standardize_state(state_string):
 
 def check_pmt_calculation(stated_pmt, original_rate, original_term, original_balance, pmt_threshold_pct=0.005, pool_threshold_pct=.025):
     calc_pmt = -np.round(npf.pmt(original_rate, original_term, original_balance), 2)
-    calc_err1 = (np.divide(np.abs(np.multiply(calc_pmt, original_term) - np.multiply(stated_pmt, original_term)), np.multiply(stated_pmt, original_term)))
-    calc_err2 = (np.divide(np.abs(np.multiply(calc_pmt, original_term) - np.multiply(stated_pmt, original_term)), original_balance))
-    count_err1 = np.sum(calc_err1 >= pmt_threshold_pct)
-    count_err2 = np.sum(calc_err2 >= pmt_threshold_pct)
-    pct_err1 = count_err1 / (1 if isinstance(original_balance, (float,int)) else len(original_balance))
-    pct_err2 = count_err2 / (1 if isinstance(original_balance, (float, int)) else len(original_balance))
-    if (calc_err1.any() > pmt_threshold_pct or calc_err2.any() > pmt_threshold_pct) and (
-            pct_err1 > pool_threshold_pct or pct_err2 > pool_threshold_pct):
-        print(f'Payment difference ((pmt_c - pmt_s) * term) / (pmt_s * term) exceeds allowed threshold in {count_err1} instances or {round(pct_err1 * 100, 2)}% of pool')
-        print(f'Balance difference ((pmt_c - pmt_s) * term) / origbal) exceeds allowed threshold in {count_err2} instances or {round(pct_err2 * 100, 2)}% of pool')
-        return (False, pct_err1, pct_err2)
+    calc_error1 = (np.divide(np.abs(np.multiply(calc_pmt, original_term) - np.multiply(stated_pmt, original_term)), np.multiply(stated_pmt, original_term)))
+    calc_error2 = (np.divide(np.abs(np.multiply(calc_pmt, original_term) - np.multiply(stated_pmt, original_term)), original_balance))
+    count_error1 = np.sum(calc_error1 >= pmt_threshold_pct)
+    count_error2 = np.sum(calc_error2 >= pmt_threshold_pct)
+    pct_error1 = count_error1 / (1 if isinstance(original_balance, (float,int)) else len(original_balance))
+    pct_error2 = count_error2 / (1 if isinstance(original_balance, (float, int)) else len(original_balance))
+    if (calc_error1.any() > pmt_threshold_pct or calc_error2.any() > pmt_threshold_pct) and (
+            pct_error1 > pool_threshold_pct or pct_error2 > pool_threshold_pct):
+        print(f'Payment difference ((pmt_c - pmt_s) * term) / (pmt_s * term) exceeds allowed threshold in {count_error1} instances or {round(pct_error1 * 100, 2)}% of pool')
+        print(f'Balance difference ((pmt_c - pmt_s) * term) / origbal) exceeds allowed threshold in {count_error2} instances or {round(pct_error2 * 100, 2)}% of pool')
+        return (False, pct_error1, pct_error2)
 
     else:
-        return (True, pct_err1, pct_err2)
+        return (True, pct_error1, pct_error2)
 
 
-def check_term_consistency(original_term, remaining_term, origination_date, maturity_date, first_payment_date, pool_threshold_pct=.025):
+def check_term_consistency(original_term, promo_term, io_term, amort_term, loan_age, remaining_term, balloon_flag, pool_threshold_pct=.025):
+    age_error = np.sum(original_term, -loan_age, -remaining_term)
+    term_sum_error = np.sum(original_term, -promo_term, -io_term, -amort_term) if balloon_flag in (None, False) else 0
+    balloon_error = np.sum( original_term, -promo_term, -io_term, -amort_term) if (balloon_flag is True and np.sum(promo_term, io_term, amort_term) < original_term) else 0
+    count_age_error = np.sum(age_error != 0)
+    count_term_sum_error = np.sum(term_sum_error != 0)
+    count_balloon_error = np.sum(balloon_error != 0)
+    pct_age_error = count_age_error / (1 if isinstance(original_term, (float, int)) else len(original_term))
+    pct_term_sum_error = count_term_sum_error / (1 if isinstance(original_term, (float, int)) else len(original_term))
+    pct_balloon_error = count_balloon_error / (1 if isinstance(original_term, (float, int)) else len(original_term))
+    if (age_error.any() != 0 or term_sum_error.any() != 0 or balloon_error.any() != 0) and (
+            pct_age_error > pool_threshold_pct or pct_term_sum_error > pool_threshold_pct or pct_balloon_error > pool_threshold_pct):
+        print(f'Original term minus loan age minus remaining term does not equal zero in {count_age_error} instances or {round(pct_age_error * 100, 2)}% of pool')
+        print(f'Original term minus promo term minus IO term minus amort term does not equal zero in {count_term_sum_error} instances or {round(pct_term_sum_error * 100, 2)}% of pool')
+        print(f'Original term minus promo term minus IO term minus amort term does not equal zero in {count_balloon_error} instances or {round(pct_balloon_error * 100, 2)}% of pool')
+        return (False, pct_age_error, pct_term_sum_error, pct_balloon_error)
+
+
+
 
 def check_orig_term_and_dates(original_term, origination_date, first_payment_date, maturity_date, pool_threshold_pct=.025):
     a = datetime.diff(first_payment_date, origination_date)
@@ -243,3 +260,19 @@ def check_rem_term_and_dates(remaining_term, origination_date, first_payment_dat
     c = datetime.diff(maturity_date, first_payment_date)
     return(a, b, c)
 
+
+#NOT COMPLETE
+
+def check_doc_types(documentation_type, income_type, asset_type, employment_type, pool_threshold_pct=.025):
+    pass
+
+
+def standardize_doctypes(documentation_type, income_type, asset_type, employment_type):
+    doc_type_dict = {'full': ('verified', 'verified', 'verified'),
+                     'alt_doc': ('alt_doc', 'alt_doc', 'verbal'),
+                     'siva': ('stated', 'verified', 'verbal'),
+                     'sisa': ('stated', 'stated', 'verbal'),
+                     'nina': ('none', 'none', 'verbal'),
+                     'no_doc': ('none', 'none', 'none')
+                     }
+    if documentation_type in doc_type_dict.keys():
