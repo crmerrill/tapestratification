@@ -1,5 +1,6 @@
 import datetime
 import numpy as np
+import pandas as pd
 import CFEngine.cmutils.sysutils as sysutils
 import csv
 from functools import cached_property
@@ -8,7 +9,7 @@ from functools import cached_property
 class AssetVariableConfig(object):
 
     required_config_fields = {'FieldName': (str, None),
-                              'DataDesc': (str, ('categorical', 'numeric', 'date')), 
+                              'DataDesc': (str, ('uniqueid','categorical', 'numeric', 'date')), 
                               'DataCategory': (str, ('strs', 'floats', 'ints', 'dates', 'bools', 'arrays')), 
                               'DataType': (str, ('str', 'enum', 'datetime.date', 'int', 'np.int64', 'float', 'np.float64', 'bool')),
                               'Description': (str, None), 
@@ -16,7 +17,7 @@ class AssetVariableConfig(object):
                               'DefaultValue': (str, None), 
                               'StratFlag': (str, ('y', 'y(e)', 'n')), 
                               'StratType': (str, ('none', 'bucketfixed', 'bucketauto', 'uniquevalue', 'vintagem', 'vintageq', 'vintagea')),
-                              'StratSummSet': (str, ('summary', 'summary_extended', 'servicing', 'performance', 'utilization')),
+                              'StratSumSet': (str, ('summary', 'summary_extended', 'servicing', 'performance', 'utilization')),
                               'GenericLoan': (bool, (True, False)), 
                               'ConsumerLoan': (bool, (True, False)),
                               'ConsumerMortgage': (bool, (True, False)),
@@ -35,20 +36,15 @@ class AssetVariableConfig(object):
     
     required_config_field_number = 35
 
-
     @staticmethod
-    def _check_escape(_input):
-        if type(_input) == str:
-            _input = _input.lower()
-        else:
-            pass
-        if _input in ('q', 'quit', 'esc', 'escape'):
-            return True
-        else:
-            return False
-
+    def convert_strs(var):
+        if var is None or pd.isnull(var) or var == '':
+            return np.na
+        else: 
+            return str(var)
+    
     @staticmethod
-    def _convert_dates(var, dt_format='%Y-%m-%d'):
+    def convert_dates(var, dt_format='%Y-%m-%d'):
         if var is None or pd.isnull(var) or var == '':
             return np.nan
         elif type(var) != str:
@@ -58,9 +54,9 @@ class AssetVariableConfig(object):
         return datetime.datetime.strptime(var, dt_format).date()
 
     @staticmethod
-    def _convert_ints(var, int_type=np.int64):
+    def convert_ints(var, int_type=np.int64):
         if type(var) in (str, object):
-            if var == '':
+            if var is None or pd.isnull(var) or var == '':
                 newvar = np.nan
             else:
                 if var.endswith('%'):
@@ -69,18 +65,18 @@ class AssetVariableConfig(object):
                     newvar = int_type(np.round(np.float64(var.replace(',', '').replace('$', '')) * 100, 0))
                 else:
                     newvar = int_type(var.replace(',', ''))
-        elif type(var) in (float, np.float64):
-            newvar = int_type(np.round(var, 0))
         elif type(var) == NoneType:
             newvar = np.nan
+        elif type(var) in (float, np.float64):
+            newvar = int_type(np.round(var, 0))
         else:
             newvar = np.int_type(var)
         return newvar
 
     @staticmethod
-    def _convert_floats(var, float_type=np.float64):
+    def convert_floats(var, float_type=np.float64):
         if type(var) in (str, object):
-            if var == '':
+            if var is None or pd.isnull(var) or var == '':
                 newvar = np.nan
             else:
                 newvar = float_type(var.replace(',', ''))
@@ -91,7 +87,7 @@ class AssetVariableConfig(object):
         return newvar
 
     @staticmethod
-    def _convert_bools(var):
+    def convert_bools(var):
         if type(var) in (str, object):
             if var.lower() in ('true', 'yes', 'y', 't', '1'):
                 return True
@@ -119,7 +115,7 @@ class AssetVariableConfig(object):
             return False
 
     @staticmethod
-    def _read_dates_to_array(date_string, **kwargs):
+    def read_dates_to_array(date_string, **kwargs):
         dt_format = '%Y-%m-%d' if kwargs.get('dt_format') is None else kwargs.get('dt_format')
         dt_delim = ';' if kwargs.get('dt_delim') is None else kwargs.get('dt_delim')
         dt_type = datetime.date if kwargs.get('dt_type') is None else kwargs.get('dt_type')
@@ -128,7 +124,7 @@ class AssetVariableConfig(object):
         return np.array([dt_parser(element.strip()) for element in date_string.split(dt_delim)], dtype=dt_type)
 
     @staticmethod
-    def _read_ramp_to_array(ramp_string):
+    def read_ramp_to_array(ramp_string):
         ramp_array = np.empty(0)
         ramp_string = ramp_string.replace(';', ',')
         for element in ramp_string.split(','):
@@ -161,11 +157,11 @@ class AssetVariableConfig(object):
 
     # TODO: REWRITE: ramp_to_array should handle dates and regular array expressions.  \
     #               Dates need to be integrated into the array converter vs. being separate converter.
-    array_converters = {'pmt_sched_amort': _read_ramp_to_array,
-                        'pmt_sched': _read_ramp_to_array,
-                        'pmt_sched_dates': _read_dates_to_array,
-                        'pmt_draw_sched': _read_ramp_to_array,
-                        'pmt_draw_sched_dates': _read_dates_to_array}
+    array_converters = {'pmt_sched_amort': read_ramp_to_array,
+                        'pmt_sched': read_ramp_to_array,
+                        'pmt_sched_dates': read_dates_to_array,
+                        'pmt_draw_sched': read_ramp_to_array,
+                        'pmt_draw_sched_dates': read_dates_to_array}
 
 
     def __init__(self, config_file=None):
@@ -193,14 +189,14 @@ class AssetVariableConfig(object):
         self.stratification_fields = {}
         self.field_required = {}
         #Data Loading Procedure Calls
-        if config_file is None or self._validate_config_file() is False:
+        if config_file is None or self.validate_config_file() is False:
             return None
         else:
-            self._load_config()
+            self.load_config()
             return None
     
-
-    def _validate_config_file(self):
+    
+    def validate_config_file(self):
         try:
             if sysutils.check_file_exist(self.config_file) is False or str(self.config_file).endswith('.csv') is False:
                 msg = 'Config file does not exist or is invalid format (must be .csv)'
@@ -208,17 +204,18 @@ class AssetVariableConfig(object):
             else:
                 with open(self.config_file, 'r', newline='') as csvfile:
                     header = next(csv.reader(csvfile, delimiter = ','))
-                    if header == list(AssetVariables.required_config_fields.keys()):
+                    if header == list(AssetVariableConfig.required_config_fields.keys()):
                         i = 0
                         for row in iter(csv.DictReader(csvfile, header, delimiter = ',')):
                             i = i+1
-                            for required_field in AssetVariables.required_config_fields.keys():
-                                assert type(row[required_field]) == AssetVariables.required_config_fields[required_field][0]
-                                if AssetVariables.required_config_fields[required_field][1] is not None:
-                                    assert row[required_field] in AssetVariables.required_config_fields[required_field][1]
-                                    return True
+                            for required_field in AssetVariableConfig.required_config_fields.keys():
+                                assert type(row[required_field]) == AssetVariableConfig.required_config_fields[required_field][0]
+                                if AssetVariableConfig.required_config_fields[required_field][1] is not None:
+                                    assert row[required_field].strip().lower() in AssetVariableConfig.required_config_fields[required_field][1]
+                                    print(row[required_field])
+                                    #return True
                                 else:
-                                    return True
+                                    print('blork')
                     else:
                         msg='Config file does not contain correct header row.'
                         raise ImportError('Config file does not contain correct header row.')
@@ -226,10 +223,10 @@ class AssetVariableConfig(object):
             print(msg)
             return False
         except AssertionError:
-            if type(row[required_field]) != AssetVariables.required_config_fields[required_field][0]:
+            if type(row[required_field]) != AssetVariableConfig.required_config_fields[required_field][0]:
                 print(f'Value in {required_field} on config file row {i} is not correct data type.')
                 return False
-            elif row[required_field] not in AssetVariables.required_config_fields[required_field][1]:
+            elif row[required_field] not in AssetVariableConfig.required_config_fields[required_field][1]:
                 print(f'Value in {required_field} on config file row {i} does not contain an accepted value.')
                 return False
             else:
@@ -237,20 +234,21 @@ class AssetVariableConfig(object):
                 return False
 
 
-    def _load_config(self):
+    def load_config(self):
         with open(self.config_file, 'r', newline='') as csvfile:
             header = next(csv.reader(csvfile, delimiter = ','))
             for row in iter(csv.DictReader(csvfile, header, delimiter = ',')):
                 field_name = row['FieldName'].strip().lower()
                 self.field_required[field_name] = bool(row['Required'])
-                if row['DataType'].strip().lower() in AssetVariablesConfig.required_config_fields['DataType'][1]:
+                eval(str('self.' + str(row['DataCategory']))).append(row['FieldName'])
+                if row['DataType'].strip().lower() in AssetVariableConfig.required_config_fields['DataType'][1]:
                     self._type_dict[field_name] = eval(row['DataType'].strip().lower())
                 else:
                     self._type_dict[field_name] = None
                 if field_name in AssetVariableConfig.array_converters.keys():
                     self._converter_dict[field_name] = AssetVariableConfig.array_converters[field_name]
                 elif row['DataType'].strip().lower() in AssetVariableConfig.required_config_fields['DataType'][1]:
-                    self._converter_dict[field_name] = eval(str('_convert_' + str(row['DataCategory']).strip().lower()))
+                    self._converter_dict[field_name] = eval(str('AssetVariableConfig._convert_' + str(row['DataCategory']).strip().lower()))
                 else:
                     self._converter_dict[field_name] = None
                 if row['StratFlag'].strip().lower() in ('y', 'y(e)'):

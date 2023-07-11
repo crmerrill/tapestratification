@@ -248,11 +248,13 @@ def check_term_consistency(original_term, promo_term, io_term, amort_term, loan_
 
 
 
-def check_orig_term_and_dates(original_term, origination_date, first_payment_date, maturity_date, pool_threshold_pct=.025):
-    a = datetime.diff(first_payment_date, origination_date)
-    b = datetime.diff(maturity_date, origination_date)
-    c = datetime.diff(maturity_date, first_payment_date)
-    return(a, b, c)
+def check_orig_term_and_dates(original_term, origination_date, first_payment_date, maturity_date, diff_type, pool_threshold_pct=.025):
+    calc_orig_term = datetime.diff(maturity_date, origination_date, diff_type)
+    calc_pmt_term = datetime.diff(maturity_date, first_payment_date)
+    if calc_orig_term == original_term or calc_pmt_term == original term: 
+        return True
+    else: 
+        return (False, {'stated_term': original_term, 'calc_term_orig': calc_orig_term, 'calc_term_pmt': calc_pmt_term})
 
 def check_rem_term_and_dates(remaining_term, origination_date, first_payment_date, maturity_date, cutoff_date, pool_threshold_pct=.025):
     a = datetime.diff(first_payment_date, origination_date)

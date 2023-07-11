@@ -1,141 +1,150 @@
-FieldName,DataDesc,DataCategory,DataType,Description,PossibleValues,DefaultValue,StratFlag,StratType,GenericLoan,ConsumerLoan,ConsumerMortgage,ConsumerAuto,ConsumerStudent,ConsumerCard,ConsumerUnsecured,CommercialLoan,CommercialMortgage,CommercialAmortizing,CommercialBullet,CommercialRevolver,CommercialABL,Required
-loanid,Unique ID,strs,str,Unique identifier for each loan or lease asset,NA,,N,None,TRUE,,,,,,,,,,,,,TRUE
-sector,Categorical,strs,str,Cash Flow Engine specific variable which triggers object type.  ,"(consumer_mortgage, consumer_auto, consumer_student, cosnumer_card, consumer_unsecured, commercial_mortgage, commercial_amortizing, commercial_bullet, commercial_revolver, commercial_abl_revolver, commercial_abl_fixed)",,Y,UniqueValue,TRUE,,,,,,,,,,,,,TRUE
-productdesc,Categorical,strs,str,Description of the loan product that is used to bucket for cash flow portfolios and stratification,NA,,Y,UniqueValue,TRUE,,,,,,,,,,,,,FALSE
-modeldesc,Categorical,strs,str,Descriptor for specific credit and prepayment model to be used.  NOT CURRENTLY ACTIVE,[Not Active],,Y(E),UniqueValue,FALSE,,,,,,,,,,,,,FALSE
-origdate,Date,dates,datetime.date,Date on which the loan was originated and from which it starts accruing interest (generally the disbursal date),,,Y,VintageQ,TRUE,,,,,,,,,,,,,TRUE
-matdate,Date,dates,datetime.date,Date on which the loan has its final maturity and all payments must be made,,,N,None,TRUE,,,,,,,,,,,,,TRUE
-cutoffdate,Date,dates,datetime.date,Date on which the tape as cut (also known as the as of date).  All current data is after this date,Must be >= CUTOFFDATE,,N,None,TRUE,,,,,,,,,,,,,TRUE
-term_orig,Numeric,ints,np.int64,Original term in months beginning on the PMT_FIRSTPAY_DATE and ending on MATDATE,,,Y,BucketFixed,TRUE,,,,,,,,,,,,,FALSE
-term_age,Numeric,ints,np.int64,Age of the loan beginning on PMT_FIRSTPAY_DATE and ending on CUTOFFDATE,,,Y,BucketAuto,TRUE,,,,,,,,,,,,,FALSE
-term_rem,Numeric,ints,np.int64,Remaining term of the loan calcualted as TERM_ORIG - TERM_AGE,,,Y,BucketAuto,TRUE,,,,,,,,,,,,,FALSE
-bal_orig,Numeric,floats,np.float64,Original outstanding principal balance of the loan on which interest accrues and which is due by MATDATE,,,Y,BucketAuto,TRUE,,,,,,,,,,,,,TRUE
-bal_curr,Numeric,floats,np.float64,,,,Y,BucketAuto,TRUE,,,,,,,,,,,,,TRUE
-pmt_orig,Numeric,floats,np.float64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-pmt_curr,Numeric,floats,np.float64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-rate_type,Categorical,strs,str,,,,Y,BucketAuto,TRUE,,,,,,,,,,,,,TRUE
-rate_compound,Categorical,strs,str,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-rate_daycount,Categorical,strs,str,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-rate_curr,Numeric,floats,np.float64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-rate_margin_promo,Numeric,floats,np.float64,,,,Y(E),BucketAuto,TRUE,,,,,,,,,,,,,FALSE
-rate_margin_io,Numeric,floats,np.float64,,,,Y(E),BucketAuto,TRUE,,,,,,,,,,,,,FALSE
-rate_margin,Numeric,floats,np.float64,,,,Y,BucketAuto,TRUE,,,,,,,,,,,,,TRUE
-rate_index,Categorical,strs,str,,,,Y,UniqueValue,TRUE,,,,,,,,,,,,,TRUE
-rate_index_initvalue,Numeric,floats,np.float64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-floatrate_fixterm,Numeric,ints,np.int64,,,,Y,BucketFixed,TRUE,,,,,,,,,,,,,TRUE
-floatrate_initresetdate,Date,dates,datetime.date,,,,N,None,TRUE,,,,,,,,,,,,,TRUE
-floatrate_lastresetdate,Date,dates,datetime.date,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-floatrate_nextresetdate,Date,dates,datetime.date,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-floatrate_resetfreq,Categorical,strs,str,,,,Y,UniqueValue,TRUE,,,,,,,,,,,,,TRUE
-_floatrate_resetsubfreq,Numeric,ints,np.int64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-floatrate_lookback,Numeric,ints,np.int64,,,,N,None,TRUE,,,,,,,,,,,,,TRUE
-floatrate_cap1,Numeric,floats,np.float64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-floatrate_floor1,Numeric,floats,np.float64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-floatrate_period1,Numeric,ints,np.int64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-floatrate_cap2,Numeric,floats,np.float64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-floatrate_floor2,Numeric,floats,np.float64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-term_amort,Numeric,ints,np.int64,,,,Y,BucketAuto,TRUE,,,,,,,,,,,,,FALSE
-pmt_sched_amort,Numeric,arrays,np.array,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-term_promo,Numeric,ints,np.int64,,,,Y(E),BucketAuto,TRUE,,,,,,,,,,,,,FALSE
-term_io,Numeric,ints,np.int64,,,,Y(E),BucketAuto,TRUE,,,,,,,,,,,,,FALSE
-pmt_freq,Categorical,strs,str,,,,Y,UniqueValue,TRUE,,,,,,,,,,,,,TRUE
-pmt_sched,Date,arrays,np.array,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-pmt_firstpay_date,Date,dates,datetime.date,,,,N,None,TRUE,,,,,,,,,,,,,TRUE
-pmt_sched_dates,Date,arrays,np.array,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-pmt_prepen,Numeric,floats,np.float64,,,,Y,UniqueValue,TRUE,,,,,,,,,,,,,FALSE
-pmt_lastpay_date,Date,dates,datetime.date,,,,N,None,TRUE,,,,,,,,,,,,,TRUE
-pmt_lastdue_date,Date,dates,datetime.date,,,,N,None,TRUE,,,,,,,,,,,,,TRUE
-pmt_nextpay_date,Date,dates,datetime.date,,,,N,None,TRUE,,,,,,,,,,,,,TRUE
-dq_status,Categorical,ints,np.int64,NOTE: Consider ENUM,,,Y,UniqueValue,TRUE,,,,,,,,,,,,,FALSE
-bal_accrued_int,Numeric,floats,np.float64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-bal_accrued_fees,Numeric,floats,np.float64,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-port_group1,Categorical,strs,str,,,,Y,UniqueValue,TRUE,,,,,,,,,,,,,FALSE
-port_group2,Categorical,strs,str,,,,Y,UniqueValue,TRUE,,,,,,,,,,,,,FALSE
-port_group3,Categorical,strs,str,,,,Y,UniqueValue,TRUE,,,,,,,,,,,,,FALSE
-flag_runcf,Flag,bools,np.bool_,, (True / Flase),,N,None,TRUE,,,,,,,,,,,,,FALSE
-flag_ integrity_data,Flag,bools,np.bool_,, (True / Flase),,N,None,TRUE,,,,,,,,,,,,,FALSE
-flat_integrity_type,Flag,bools,np.bool_,, (True / Flase),,N,None,TRUE,,,,,,,,,,,,,FALSE
-flag_paydate,Flag,dates,datetime.date,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-flag_rateget,Flag,dates,datetime.date,,,,N,None,TRUE,,,,,,,,,,,,,FALSE
-fico_orig,Numeric,ints,np.int64,,,,Y(E),BucketFixed,FALSE,TRUE,,,,,,,,,,,,
-fico_orig_borrower2,Numeric,ints,np.int64,,,,N,None,FALSE,TRUE,,,,,,,,,,,,
-fico_curr,Numeric,ints,np.int64,,,,Y(E),BucketFixed,FALSE,TRUE,,,,,,,,,,,,
-fico_curr_date,Date,dates,datetime.date,,,,N,None,FALSE,TRUE,,,,,,,,,,,,
-fico_curr_borrower2,Numeric,ints,np.int64,,,,N,None,FALSE,TRUE,,,,,,,,,,,,
-fico_curr_date_borrower2,Date,dates,datetime.date,,,,N,None,FALSE,TRUE,,,,,,,,,,,,
-state,Categrical,strs,str,,,,Y,UniqueValue,FALSE,TRUE,,,,,,,,,,,,
-zip,Categrical,strs,str,,,,N,None,FALSE,TRUE,,,,,,,,,,,,
-state_borrwer2,Categrical,strs,str,,,,N,None,FALSE,TRUE,,,,,,,,,,,,
-zip_borrower2,Categrical,strs,str,,,,N,None,FALSE,TRUE,,,,,,,,,,,,
-uw_doctype,Categrical,strs,str,Type of documentation used at underwriting.  Referrs to income and employment verification if non-mortgage,MTG: full; low; none | CONS: full; inc; emp; none |,,Y,UniqueValue,FALSE,TRUE,,,,,,,,,,,,
-uw_creditgrade,Categorical,strs,str,,,,Y,UniqueValue,FALSE,TRUE,,,,,,,,,,,,
-uw_ltv_orig,Numeric,floats,np.float64,Loan to Value ratio as of ORIGDATE equal to PROP_APPRAISAL / ORIGBAL,,,Y(E),BucketFixed,FALSE,,TRUE,TRUE,FALSE,FALSE,TRUE,,,,,,,
-uw_ltv_curr,Numeric,floats,np.float64,,,,Y(E),BucketFixed,FALSE,,TRUE,,,,,,,,,,,
-uw_cltv_orig,Numeric,floats,np.float64,,,,Y(E),BucketFixed,FALSE,,TRUE,,,,,,,,,,,
-uw_dti_orig,Numeric,floats,np.float64,Debt to Income ratio as of ORIGDATE equal to PMT / INC_VER,,,Y(E),BucketFixed,FALSE,,TRUE,TRUE,FALSE,FALSE,TRUE,,,,,,,
-uw_inc_stated,Numeric,floats,np.float64,,,,Y(E),BucketAuto,FALSE,,TRUE,,,,,,,,,,,
-uw_inc_verify,Numeric,floats,np.float64,,,,Y(E),BucketAuto,FALSE,,TRUE,,,,,,,,,,,
-lien2_loanid,IDxRef,strs,str,LOANID for second lien reflected in CUMORIGBAL,,,N,None,FALSE,,TRUE,FALSE,TRUE,FALSE,TRUE,,,,,,,
-lien2_bal_orig,Numeric,floats,np.float64,ORIGBAL for second lien reflected in CUMORIGBAL,,,N,None,FALSE,,TRUE,FALSE,TRUE,FALSE,TRUE,,,,,,,
-lien2_loantype,Categorical,strs,str,??? for second lien reflected in ,,,N,None,FALSE,,TRUE,FALSE,TRUE,FALSE,TRUE,,,,,,,
-bal_orig_cum,Numeric,floats,np.float64,,,,Y(E),BucketAuto,FALSE,,TRUE,TRUE,TRUE,TRUE,TRUE,,,,,,,
-pmt_ti_orig,Numeric,floats,np.float64,Periodic Tax and Insurance payment due ,,,N,None,FALSE,,TRUE,,,,,,,,,,,
-fee_annual,Numeric,floats,np.float64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-fee_excesslimit,Numeric,floats,np.float64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-fee_late1,Numeric,floats,np.float64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-fee_late2,Numeric,floats,np.float64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-fee_other,Numeric,floats,np.float64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-fee_merchant,Numeric,floats,np.float64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-fee_merchant_share,Numeric,floats,np.float64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-bal_limit_orig,Numeric,floats,np.float64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-bal_limit_curr,Numeric,floats,np.float64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-bal_orig_util,Numeric,floats,np.float64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-bal_curr_util,Numeric,floats,np.float64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-pmt_draw_sched,Numeric,arrays,np.array,,,,N,,FALSE,,FALSE,,,,,,,,,,,
-pmt_draw_sched_dates,Date,arrays,np.array,,,,N,,FALSE,,FALSE,,,,,,,,,,,
-svc_name,Categorical,strs,str,,,,Y(E),UniqueValue,TRUE,,,,,,,,,,,,,
-svc_fee_type,Categorical,strs,str,,,,N,None,TRUE,,,,,,,,,,,,,
-svc_fee_gross,Numeric,floats,np.float64,,,,Y(E),,TRUE,,,,,,,,,,,,,
-svc_fee_net,Numeric,floats,np.float64,,,,Y(E),,TRUE,,,,,,,,,,,,,
-svc_fee_gtee,Numeric,floats,np.float64,,,,Y(E),,FALSE,,TRUE,,,,,,,,,,,
-svc_fee_late,Numeric,floats,np.float64,,,,N,,TRUE,,TRUE,,,,,,,,,,,
-svc_fee_late_type,Categorical,strs,str,,,,N,,TRUE,,TRUE,,,,,,,,,,,
-svc_fee_pmt,Numeric,floats,np.float64,,,,N,,TRUE,,TRUE,,,,,,,,,,,
-svc_fee_pmt_type,Categorical,strs,str,,,,N,,TRUE,,TRUE,,,,,,,,,,,
-svc_adv_type,Categorical,strs,str,,,,Y(E),,TRUE,,TRUE,,,,,,,,,,,
-svc_adv_balrec,Numeric,floats,np.float64,,,,Y(E),,TRUE,,TRUE,,,,,,,,,,,
-svc_adv_balnorec,Numeric,floats,np.float64,,,,Y(E),,TRUE,,TRUE,,,,,,,,,,,
-svc_adv_tp_balrec,Numeric,floats,np.float64,,,,Y(E),,TRUE,,TRUE,,,,,,,,,,,
-svc_rate_pt,Numeric ,floats,np.float64,,,,Y(E),,TRUE,,TRUE,,,,,,,,,,,
-bk_status,Categorical,strs,str,,,,Y,,FALSE,TRUE,TRUE,,,,,,,,,,,
-bk_type,Categorical,ints,np.int64,,,,Y(E),,FALSE,TRUE,TRUE,,,,,,,,,,,
-bk_startdate,Date,dates,datetime.date,,,,N,,FALSE,TRUE,TRUE,,,,,,,,,,,
-bk_disdate,Date,dates,datetime.date,,,,N,,FALSE,TRUE,TRUE,,,,,,,,,,,
-fc_status,Categorical,strs,str,,,,Y,,FALSE,,TRUE,TRUE,,,,,,,,,,
-fc_startdate,Date,dates,datetime.date,,,,N,,FALSE,,TRUE,TRUE,,,,,,,,,,
-fc_sale_date,Date,dates,datetime.date,,,,N,,FALSE,,TRUE,TRUE,,,,,,,,,,
-fc_sale_value,Numeric,floats,np.float64,,,,N,,FALSE,TRUE,TRUE,,,,,,,,,,,
-mod_startdate,Date,dates,datetime.date,,,,N,,FALSE,TRUE,TRUE,,,,,,,,,,,
-mod_type,Categorical,strs,str,,,,Y,,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,,,,,,,
-ins_company_code,Numeric,ints,np.int64,,,,Y(E),,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,,,,,,,
-ins_company_name,Categorical,strs,str,,,,Y(E),,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,,,,,,,
-ins_flag,Flag,bools,np.bool_,,,,,,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,,,,,,,
-ins_coverage,Numeric,floats,np.float64,,,,,,FALSE,,TRUE,,,,,,,,,,,
-ins_charge,Numeric,floats,np.float64,,,,,,FALSE,,TRUE,,,,,,,,,,,
-ins_charge_type,Categorical,strs,str,,,,,,FALSE,,TRUE,,,,,,,,,,,
-prop_appraisal,Numeric ,floats,np.float64,Property appraisal / value as of ORIGDATE,,,Y(E),,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,,,,,,,
-prop_zip,Categorical,strs,str,Zip code where property is located,,,N,None,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,,,,,,,
-prop_zip4,Categorical,strs,str,+4 of zip code where property is located,,,N,None,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,,,,,,,
-prop_type,Categorical,strs,str,,,,Y(E),UniqueValue,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,,,,,,,
-prop_units,Categorical,ints,np.int64,,,,Y(E),UniqueValue,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,,,,,,,
-prop_occtype,Categorical,strs,str,,,,Y(E),UniqueValue,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,,,,,,,
-prop_purposetype,Categorical,strs,str,,,,Y(E),UniqueValue,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,,,,,,,
-prop_lientype,Numeric,ints,np.int64,,,,Y(E),,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,,,,,,,
-prop_value,Numeric,floats,np.float64,,,,Y(E),,FALSE,,TRUE,,,,,,,,,,,
-prop_value_date,Date,dates,datetime.date,,,,N,,FALSE,,TRUE,,,,,,,,,,,
-prop_make,Categorical,strs,str,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-prop_model,Categorical,strs,str,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-prop_year,Date,ints,np.int64,,,,Y(E),,FALSE,,FALSE,,,,,,,,,,,
-esc_currbal,Numeric,floats,np.float64,,,,Y(E),,FALSE,,TRUE,,,,,,,,,,,
-esc_advtype,Categorical,strs,str,,,,Y(E),,FALSE,,TRUE,,,,,,,,,,,
-esc_advbal,Numeric,floats,np.float64,,,,Y(E),,FALSE,,TRUE,,,,,,,,,,,
+FieldName,DataDesc,DataCategory,DataType,Description,PossibleValues,DefaultValue,StratFlag,StratType,StratSumSet,GenericLoan,ConsumerLoan,ConsumerMortgage,ConsumerAuto,ConsumerStudent,ConsumerCard,ConsumerUnsecured,CommercialLoan,CommercialMortgage,CommercialAmortizing,CommercialBullet,CommercialRevolver,CommercialABL,Required
+loanid,UniqueID,strs,str,Unique identifier for each loan or lease asset,NA,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+sector,Categorical,strs,str,Cash Flow Engine specific variable which triggers object type.  ,"(consumer_mortgage, consumer_auto, consumer_student, cosnumer_card, consumer_unsecured, commercial_mortgage, commercial_amortizing, commercial_bullet, commercial_revolver, commercial_abl_revolver, commercial_abl_fixed)",,Y,UniqueValue,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+productdesc,Categorical,strs,str,Description of the loan product that is used to bucket for cash flow portfolios and stratification,NA,,Y,UniqueValue,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+modeldesc,Categorical,strs,str,Descriptor for specific credit and prepayment model to be used.  NOT CURRENTLY ACTIVE,[Not Active],,Y,UniqueValue,Extended,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+origdate,Date,dates,datetime.date,YYYY-MM-DD date the loan was originated.  Insterest accrual starts on this date and typically this is also the disbursment date,YYYY-MM-DD,,Y,VintageQ,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+matdate,Date,dates,datetime.date,YYYY-MM-DD date on which the loan has its final maturity and all payments must be made,YYYY-MM-DD >=origdate,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+cutoffdate,Date,dates,datetime.date,YYYY-MM-DD date on which the tape is cut (also known as the as-of-date).  All current data is after this date,YYYY-MM-DD >=cutoffdate,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+term_orig,Numeric,ints,np.int64,Original term in months beginning on the PMT_FIRSTPAY_DATE and ending on MATDATE,,,Y,BucketFixed,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+term_age,Numeric,ints,np.int64,Age of the loan beginning on PMT_FIRSTPAY_DATE and ending on CUTOFFDATE,,,Y,BucketAuto,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+term_rem,Numeric,ints,np.int64,Remaining term of the loan calcualted as TERM_ORIG - TERM_AGE,,,Y,BucketAuto,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bal_orig,Numeric,floats,np.float64,Original outstanding principal balance of the loan on which interest accrues and which is due by MATDATE,,,Y,BucketAuto,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+bal_curr,Numeric,floats,np.float64,Current outstanding principal balance on CUTOFFDATE of the loan on which interest accrues and which is due by MATDATE,,,Y,BucketAuto,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+pmt_orig,Numeric,floats,np.float64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+pmt_curr,Numeric,floats,np.float64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+rate_type,Categorical,strs,str,,,,Y,BucketAuto,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+rate_compound,Categorical,strs,str,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+rate_daycount,Categorical,strs,str,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+rate_curr,Numeric,floats,np.float64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+rate_margin_promo,Numeric,floats,np.float64,,,,Y,BucketAuto,Extended,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+rate_margin_io,Numeric,floats,np.float64,,,,Y,BucketAuto,Extended,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+rate_margin,Numeric,floats,np.float64,,,,Y,BucketAuto,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+rate_index,Categorical,strs,str,,,,Y,UniqueValue,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+rate_index_initvalue,Numeric,floats,np.float64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+floatrate_fixterm,Numeric,ints,np.int64,,,,Y,BucketFixed,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+floatrate_initresetdate,Date,dates,datetime.date,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+floatrate_lastresetdate,Date,dates,datetime.date,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+floatrate_nextresetdate,Date,dates,datetime.date,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+floatrate_resetfreq,Categorical,strs,str,,,,Y,UniqueValue,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+_floatrate_resetsubfreq,Numeric,ints,np.int64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+floatrate_lookback,Numeric,ints,np.int64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+floatrate_cap1,Numeric,floats,np.float64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+floatrate_floor1,Numeric,floats,np.float64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+floatrate_period1,Numeric,ints,np.int64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+floatrate_cap2,Numeric,floats,np.float64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+floatrate_floor2,Numeric,floats,np.float64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+term_amort,Numeric,ints,np.int64,,,,Y,BucketAuto,Summary,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+pmt_sched_amort,Numeric,arrays,np.array,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+term_promo,Numeric,ints,np.int64,,,,Y,BucketAuto,Extended,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+term_io,Numeric,ints,np.int64,,,,Y,BucketAuto,Extended,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+pmt_freq,Categorical,strs,str,,,,Y,UniqueValue,Extended,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+pmt_sched,Date,arrays,np.array,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+pmt_firstpay_date,Date,dates,datetime.date,YYYYMM date on which the first loan payment is due. First payment due date is generally either on the first day the first or second subsequent month following ORIGDATE (OR) the date one month from ORIGDATE.  The Engine uses PMT_FIRSTPAY_DATE to determine the day of the month on which payments are made.,YYYY-MM-DD >=origdate,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+pmt_sched_dates,Date,arrays,np.array,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+pmt_prepen,Numeric,floats,np.float64,,,,Y,UniqueValue,Extended,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+pmt_lastpay_date,Date,dates,datetime.date,,<=matdate,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+pmt_lastdue_date,Date,dates,datetime.date,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+pmt_nextpay_date,Date,dates,datetime.date,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+dq_status,Categorical,ints,np.int64,NOTE: Consider ENUM,,,Y,UniqueValue,Performance,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bal_accrued_int,Numeric,floats,np.float64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bal_accrued_fees,Numeric,floats,np.float64,,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+port_group1,Categorical,strs,str,,,,Y,UniqueValue,Extended,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+port_group2,Categorical,strs,str,,,,Y,UniqueValue,Extended,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+port_group3,Categorical,strs,str,,,,Y,UniqueValue,Extended,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+flag_runcf,Flag,bools,bool,,TRUE; FALSE; Y; N; T; F; 1; 0,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+flag_ integrity_data,Flag,bools,bool,,TRUE; FALSE; Y; N; T; F; 1; 0,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+flat_integrity_type,Flag,bools,bool,,TRUE; FALSE; Y; N; T; F; 1; 0,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+flag_paydate,Flag,dates,datetime.date,? What is this?,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+flag_rateget,Flag,dates,datetime.date,? What is this?,,,N,None,None,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fico_type,Categorical,strs,str,"Description of the type of FICO_ORIG, FICO_CURR score (ex. FICO5, Vantage3, Other)",,,Y,UniqueValue,Extended,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fico_orig,Numeric,ints,np.int64,FICO / credit score for primary borrower at ORIGDATE,,,Y(E),BucketFixed,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fico_orig_borrower2,Numeric,ints,np.int64,FICO / credit score for secondary or co-borrower at ORIGDATE,,,N,None,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fico_curr,Numeric,ints,np.int64,FICO / credit score for primary borrower at FICO_CURR_DATE,,,Y(E),BucketFixed,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fico_curr_date,Date,dates,datetime.date,Date on which the FICO_CURR score was obtained,,,N,None,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fico_curr_borrower2,Numeric,ints,np.int64,FICO / credit score for secondary borrower at FICO_CURR_DATE_BORROWER2,,,N,None,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fico_curr_date_borrower2,Date,dates,datetime.date,Date on which the FICO_CURR_BORROWER2 score was obtained,,,N,None,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+state,Categrical,strs,str,State in which the primary borrower is located (this is typically the juristiction in which the loan is written),,,Y,UniqueValue,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+zip,Categrical,strs,str,Zip code in which the primary borrower is located (this should match STATE),,,N,None,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+state_borrwer2,Categrical,strs,str,State in which the secondary / co-borrower is located,,,N,None,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+zip_borrower2,Categrical,strs,str,Zip code in which the secondary / co-borrower borrower is located (this should match STATE_BORROWER2),,,N,None,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+uw_doctype,Categrical,strs,str,Type of documentation used at underwriting.  Referrs to income and employment verification if non-mortgage,MTG: full; low; none | CONS: full; inc; emp; none |,,Y,UniqueValue,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+uw_creditgrade,Categorical,strs,str,,,,Y,UniqueValue,,FALSE,TRUE,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+uw_ltv_orig,Numeric,floats,np.float64,Loan to Value ratio as of ORIGDATE equal to PROP_APPRAISAL / ORIGBAL,,,Y(E),BucketFixed,,FALSE,,TRUE,TRUE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+uw_ltv_curr,Numeric,floats,np.float64,,,,Y(E),BucketFixed,,FALSE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+uw_cltv_orig,Numeric,floats,np.float64,,,,Y(E),BucketFixed,,FALSE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+uw_dti_orig,Numeric,floats,np.float64,Debt to Income ratio as of ORIGDATE equal to PMT / INC_VER,,,Y(E),BucketFixed,,FALSE,,TRUE,TRUE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+uw_inc_stated,Numeric,floats,np.float64,,,,Y(E),BucketAuto,,FALSE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+uw_inc_verify,Numeric,floats,np.float64,,,,Y(E),BucketAuto,,FALSE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+lien2_loanid,IDxRef,strs,str,LOANID for second lien reflected in CUMORIGBAL,,,N,None,,FALSE,,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+lien2_bal_orig,Numeric,floats,np.float64,ORIGBAL for second lien reflected in CUMORIGBAL,,,N,None,,FALSE,,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+lien2_loantype,Categorical,strs,str,??? for second lien reflected in ,,,N,None,,FALSE,,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bal_orig_cum,Numeric,floats,np.float64,,,,Y(E),BucketAuto,,FALSE,,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+pmt_ti_orig,Numeric,floats,np.float64,Periodic Tax and Insurance payment due ,,,N,None,,FALSE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fee_annual,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fee_excesslimit,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fee_late1,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fee_late2,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fee_other,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fee_merchant,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fee_merchant_share,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bal_limit_orig,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bal_limit_curr,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bal_orig_util,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bal_curr_util,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+pmt_draw_sched,Numeric,arrays,np.array,,,,N,,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+pmt_draw_sched_dates,Date,arrays,np.array,,,,N,,,FALSE,,FALSE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_name,Categorical,strs,str,,,,Y(E),UniqueValue,,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_fee_type,Categorical,strs,str,,,,N,None,,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_fee_gross,Numeric,floats,np.float64,,,,Y(E),,,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_fee_net,Numeric,floats,np.float64,,,,Y(E),,,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_fee_gtee,Numeric,floats,np.float64,,,,Y(E),,,FALSE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_fee_late,Numeric,floats,np.float64,,,,N,,,TRUE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_fee_late_type,Categorical,strs,str,,,,N,,,TRUE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_fee_pmt,Numeric,floats,np.float64,,,,N,,,TRUE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_fee_pmt_type,Categorical,strs,str,,,,N,,,TRUE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_adv_type,Categorical,large,str,,,,Y(E),,,TRUE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_adv_balrec,Numeric,floats,np.float64,,,,Y(E),,,TRUE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_adv_balnorec,Numeric,floats,np.float64,,,,Y(E),,,TRUE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_adv_tp_balrec,Numeric,floats,np.float64,,,,Y(E),,,TRUE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_rate_pt,Numeric ,floats,np.float64,,,,Y(E),,,TRUE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_sub_name,Categorical,strs,str,,,,Y,,,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_sub_fee_type,Categorical,strs,str,,,,Y,,,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_sub_fee_gross,Numeric,floats,np.float64,,,,Y,,,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_sub_fee2_type,Categorical,strs,str,,,,N,,,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+svc_sub_fee2_gross,Numeric,floats,np.float64,,,,N,,,TRUE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bk_status,Categorical,strs,str,,,,Y,,,FALSE,TRUE,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bk_type,Categorical,ints,np.int64,,,,Y(E),,,FALSE,TRUE,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bk_startdate,Date,dates,datetime.date,Date on which bankruptcy proceedings were started,,,N,,,FALSE,TRUE,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+bk_disdate,Date,dates,datetime.date,Date on which bankruptcy was discharged,,,N,,,FALSE,TRUE,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fc_status,Categorical,strs,str,Indicator showing foreclosure status,,,Y,,,FALSE,,TRUE,TRUE,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fc_startdate,Date,dates,datetime.date,Date on which foreclosure proceedings were started,,,N,,,FALSE,,TRUE,TRUE,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fc_sale_date,Date,dates,datetime.date,Date of foreclosure sale,>fc_startdate,,N,,,FALSE,,TRUE,TRUE,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+fc_sale_value,Numeric,floats,np.float64,Sale price of collateral on FC_SALE_DATE,,,N,,,FALSE,TRUE,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+mod_startdate,Date,dates,datetime.date,Date on which loan as modified,,,N,,,FALSE,TRUE,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+mod_type,Categorical,strs,str,Type of modification made to loan on MOD_STARTDATE,,,Y,,,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+ins_company_name,Categorical,strs,str,Name of company insuring collateral.  Should match INS_COMPANY_CODE,,,Y,,,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+ins_flag,Flag,bools,bool,Flag for identifying insurance coverage against property,TRUE; FALSE; Y; N; T; F; 1; 0,,N,,Extended2,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+ins_coverage,Numeric,floats,np.float64,Amount of coverage provided by INS_COMPANY_NAME for property,,,N,,Extended2,FALSE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+ins_charge,Numeric,floats,np.float64,,,,N,,Extended2,FALSE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+ins_charge_type,Categorical,strs,str,,,,N,,Extended2,FALSE,,TRUE,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_appraisal,Numeric ,floats,np.float64,"Property appraisal / value as of ORIGDATE.  This is the appraisal value for mortgages, otherwise it is the sale price. ",,,Y,,,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_state,Categorical,strs,str,The state in which the property is located or registered,ANY,,Y,,,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_zip,Categorical,strs,str,Zip code where property is located,ANY,,N,None,,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_zip4,Categorical,strs,str,USA +4 of zip code where property is located,,,N,None,,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_type,Categorical,strs,str,,,,Y,UniqueValue,,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_units,Categorical,ints,np.int64,Number of units in property securing loan,,,Y,UniqueValue,,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_occtype,Categorical,strs,str,"Property usage (owner, non-owner, second, NA)",OO; NOO; 2ND; 3RD; NA,,Y,UniqueValue,,FALSE,,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_purposetype,Categorical,strs,str,,,,Y,UniqueValue,,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_lientype,Numeric,ints,np.int64,Type of lien on property securing loan,,,Y,,,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_value,Numeric,floats,np.float64,Updated version of PROP_APPRAISAL as of PROP_VALUE_DATE,,,Y,,,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_value_date,Date,dates,datetime.date,Date that PROP_VALUE was acquired,,,N,,,FALSE,,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_value_type,Categorical,strs,str,Type of valuation ,APP;BPO;,,Y,,,FALSE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_category,Categorical,strs,str,High-level type of property underlying ,,,Y,,,FALSE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_category2,Categorical,strs,str,Sub-category specific to prop_category (ex. Prop_category = auto_retail ; prop_category2 = sedan),,,Y,,,FALSE,,,,,,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_make,Categorical,strs,str,Manufacturer of property securing loan,,,Y,,,FALSE,,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_model,Categorical,strs,str,Model of property securing loan,,,Y,,,FALSE,,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+prop_year,Date,ints,np.int64,Year of manufacture for property securing loan,,,Y,,,FALSE,,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+esc_currbal,Numeric,floats,np.float64,Current balance of escrow account (if any) as of CUTOFFDATE,,,Y,,,FALSE,,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+esc_advtype,Categorical,strs,str,"If escrow is advanced for any reason, this specifies the type of advance (percentage, dollar based, etc)",,,Y,,,FALSE,,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+esc_advbal,Numeric,floats,np.float64,,,,Y,,,FALSE,,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
