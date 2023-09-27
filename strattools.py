@@ -169,6 +169,8 @@ class Stratification:
         self.consumer_unsecured_performance = None
         self.consumer_unsecured_servicing = None
 
+        
+        
         self.stratify()
 
 
@@ -308,15 +310,19 @@ class Stratification:
         )
         return summary_strat
 
-        summary_strat = dataframe.groupby(stratification_variable).agg(
-            count=('bal_orig', 'count'),
-            count_pct=('bal_orig', lambda x: round(x.count() / self.tape['bal_orig'].count() * 100, 3)),
-            origlimit=('bal_limit_orig', 'sum'),
-            currlimit=('bal_limit_curr', 'sum'),
-            currbal=('bal_curr', 'sum'),
-            currutil=('bal_curr_util', lambda x: round(self.tape.loc[x.index, 'bal_curr'].sum() / self.tape.loc[x.index, 'bal_limit_curr'].sum() * 100, 3)),
+        summary_strat = dataframe.groupby(stratification_variable).agg()
+            # count=('bal_orig', 'count'),
+            # count_pct=('bal_orig', lambda x: round(x.count() / self.tape['bal_orig'].count() * 100, 3)),
+            # origlimit=('bal_limit_orig', 'sum'),
+            # currlimit=('bal_limit_curr', 'sum'),
+            # currbal=('bal_curr', 'sum'),
+            # currutil=('bal_curr_util', lambda x: round(self.tape.loc[x.index, 'bal_curr'].sum() / self.tape.loc[x.index, 'bal_limit_curr'].sum() * 100, 3)),
 
-
+    
+    
+    
+    
+    
     def strat_summary_extended(self):
         summary_extended_strat = dataframe.groupby(stratification_variable).agg(
             count=('bal_orig', 'count'),
@@ -324,24 +330,31 @@ class Stratification:
             origbal=('bal_orig', 'sum'),
             origbal_pct=('bal_orig', lambda x: round(x.sum() / self.tape['bal_orig'].sum() * 100, 3)),
             currbal=('bal_curr', 'sum'),
-            currbal_pct=('bal_curr', lambda x: round(x.sum() / self.tape['bal_curr'].sum() * 100, 3)),
-            wa_origterm=('term_orig', origbal_wa_zero_int),
-            wa_promo_term=('term_promo', origbal_wa_zero_int),
-            wa_io_term=('term_io', origbal_wa_zero_int),
+            currbal_pct=('bal_curr', lambda x: round(x.sum() / self.tape['bal_curr'].sum() * 100, 3))
+            
+            term_orig=('term_orig', origbal_wa_zero_int),
+            term_rem=('term_rem', currbal_wa_zero_int),
 
-            wa_age=('term_age', currbal_wa_zero_int),
-            wa_rem_term=('term_rem', currbal_wa_zero_int),
-
-            wa_origrate=('rate_margin', origbal_wa_zero),
-            wa_margin_promo=('rate_margin_promo', origbal_wa_zero),
-            wa_margin_io=('rate_margin_io', origbal_wa_zero),
-            wa_margin=('rate_margin', origbal_wa_zero),
-            wa_currrate=('rate_curr', currbal_wa_zero),
+            margin=('rate_margin', origbal_wa_zero),
+            currrate=('rate_curr', currbal_wa_zero),
 
 
-            wa_origfico_1=('fico_orig', origbal_wa_zero_int),
-            wa_origfico_2=('fico_orig_borrower2', origbal_wa_zero_int),
+            fico_orig_1=('fico_orig', origbal_wa_zero_int),
+            fico_orig_2=('fico_orig_borrower2', origbal_wa_zero_int),
 
+            fico_curr_1=('fico_curr', origbal_wa_zero_int),
+            fico_curr_2=('fico_curr_borrower2', origbal_wa_zero_int),
+            income_stated=('uw_inc_stated', origbal_wa_zero_int)
+            income_verified=('uw_inc_verify', origbal_wa_zero_int)
+            dti_orig
+            dti_curr
+            prop_value
+            prop_value_age
+            ltv_orig
+            ltv_curr
+            cltv_orig
+            cltv_curr
+        )
         pass
 
     def strat_performance(self):
