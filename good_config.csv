@@ -1,0 +1,8 @@
+FieldName,DataDesc,DataCategory,DataType,Description,PossibleValues,DefaultValue,StratFlag,StratType,StratSumSet,GenericLoan,ConsumerLoan,ConsumerMortgage,ConsumerAuto,ConsumerStudent,ConsumerCard,ConsumerUnsecured,CommercialLoan,CommercialMortgage,CommercialAmortizing,CommercialBullet,CommercialRevolver,CommercialABL,Required
+boolean_variable,categorical,bools,bool,this is a boolean variable,True;False,True,True,unique_value,summary,True,False,False,False,False,False,False,False,False,False,False,False,False,True
+int_variable,numeric,ints,np.longlong,this is an int variable,,42,True,bucket_auto,summary,True,False,False,False,False,False,False,False,False,False,False,False,False,True
+int_variable2,numeric,ints,np.longlong,this is also an int variable,,7,True,bucket_fixed,summary_extended,True,False,False,False,False,False,False,False,False,False,False,False,False,True
+float_variable1,numeric,floats,np.longdouble,this is a float variable,,3.14159,True,bucket_auto,summary,True,False,False,False,False,False,False,False,False,False,False,False,False,True
+float_variable2,numeric,floats,np.longdouble,this is also a float variable,,2.71828,True,bucket_auto,summary_extended,True,False,False,False,False,False,False,False,False,False,False,False,False,True
+string_variable,categorical,strs,str,this is a string variable,,string thing,True,unique_value,performance,True,False,False,False,False,False,False,False,False,False,False,False,False,True
+date_variable,date,dates,datetime.date,this is a date variable,,1982-4-13,True,vintage_month,summary,True,False,False,False,False,False,False,False,False,False,False,False,False,True
