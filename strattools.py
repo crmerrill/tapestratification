@@ -15,7 +15,7 @@ def weighted_average_factory(**kwargs):
     output_type = kwargs.get('output_type')
     def weighted_average(values):
         try:
-            if zero_values is None:
+            if zero_values is None or str(zero_values).lower() in ('na', 'nan', 'none', 'null'):
                 values_mask = ~np.isnan(values)
                 if all(v is False for v in values_mask):
                     raise ValueError('there are no non-missing x variable values')
@@ -107,19 +107,24 @@ def bucketize_data(dataframe: pd.DataFrame, variable: str, max_buckets: int = 10
 
 class Stratification:
 
-    req_fields_consumer = ('bal_orig', 'bal_curr', 'rate_margin', 'term_orig', 'term_rem', 'fico_orig', 'fico_curr',
-                           'uw_ltv_orig', 'bal_orig_cum', 'prop_appraisal', 'uw_dti_orig', 'fc_status', 'bk_status',
-                           'state', 'mod_type')
-
-    req_fields_consumer_servicing = ('svc_rate_pt', 'svc_fee_gross', 'svc_fee_net', 'svc_fee_gtee', 'svc_fee_late',
-                                     'svc_fee_pmt', 'svc_adv_balrec', 'svc_adv_balnorec', 'svc_adv_tp_balrec',
-                                     'esc_currbal', 'esc_advbal')
-
-    req_fields_consumer_auto = ()
-
-    req_fields_consumer_student = ()
-
-    req_fields_consumer_card = ()
+    # def __new__(cls, *args, **kwargs):
+    #     class_instance = super().__new__(cls)
+    #     class_instance.required_fields_consumer = kwargs.get('config_object').required_fields_consumer
+    #
+    #
+    # req_fields_consumer = ('bal_orig', 'bal_curr', 'rate_margin', 'term_orig', 'term_rem', 'fico_orig', 'fico_curr',
+    #                        'uw_ltv_orig', 'bal_orig_cum', 'prop_appraisal', 'uw_dti_orig', 'fc_status', 'bk_status',
+    #                        'state', 'mod_type')
+    #
+    # req_fields_consumer_servicing = ('svc_rate_pt', 'svc_fee_gross', 'svc_fee_net', 'svc_fee_gtee', 'svc_fee_late',
+    #                                  'svc_fee_pmt', 'svc_adv_balrec', 'svc_adv_balnorec', 'svc_adv_tp_balrec',
+    #                                  'esc_currbal', 'esc_advbal')
+    #
+    # req_fields_consumer_auto = ()
+    #
+    # req_fields_consumer_student = ()
+    #
+    # req_fields_consumer_card = ()
 
 
     def __init__(self, tape, variable, **kwargs):
@@ -242,55 +247,67 @@ class Stratification:
                                                                            bucketize_data(self.tape_commercial_abl, self.stratify_by))))
 
     @staticmethod
-    def strat_summary_consumer_closed(input_tape: pd.DataFrame, stratification_variable: str, stratification_buckets: list = None) -> pd.DataFrame:
-        #Check if stratificaiton_variable is a variable in the input_tape, and then create buckets if not already given.
-        if stratification_variable in input_tape.columns and stratification_buckets is None:
-            stratification_buckets = bucketize_data(input_tape, stratification_variable)
-        elif stratification_variable in input_tape.columns and stratification_buckets is not None:
-            stratificaiton_buckets = [stratification_buckets] if type(stratification_buckets) is not list else stratification_buckets
-        elif stratification_variable not in input_tape.columns:
-            raise ValueError(f'Stratification variable {stratification_variable} not found in dataframe.')
-        else:
-            raise ValueError(f'Unknown error with stratification variable {stratification_variable}.')
+    def strat_summary_consumer_closed(input_tape: pd.DataFrame, stratification_variable: str, stratification_buckets: list, **kwargs) -> pd.DataFrame:
+        #Check that the required fields for the strat are in the input_tape:
+        required_fields = ('bal_orig', 'bal_curr', 'rate_margin', 'term_orig', 'term_rem', 'fico_orig', 'fico_curr',
+                            'uw_ltv_orig', 'bal_orig_cum', 'prop_appraisal', 'uw_dti_orig', 'fc_status', 'bk_status',
+                            'state', 'mod_type')
+        if not all(x in input_tape.columns for x in required_fields):
+            raise ValueError(f'Not all required fields are present in the input_tape.  Required fields are: {required_fields}')
+
+        #Create the weighted average functions requried for dataframe summary
+        origbal_weight = weighted_average_factory(weights=input_tape['origbal'], zeros=kwargs.get('zeros', 0))
+        origbal_weight_int = weighted_average_factory(weights=input_tape['origbal'], zeros=kwargs.get('zeros', 0), rounding=True, output_type='int')
+        currbal_weight = weighted_average_factory(weights=input_tape['currbal'], zeros=kwargs.get('zeros', 0))
+        currbal_weight_int = weighted_average_factory(weights=input_tape['currbal'], zeros=kwargs.get('zeros', 0), rounding=True, output_type='int')
+
+        #Calculate teh top two stated by count of assets in the input_tape
+        top_1_state = input_tape[['prop_state', 'count']].groupby(['prop_state']).count().sort_values(by='count', ascending=False)[:1].index[0]
+        top_2_state = input_tape[['prop_state', 'count']].groupby(['prop_state']).count().sort_values(by='count', ascending=False)[1:2].index[0]
+
+        #Create the summary dataframe
+        summary_strat = input_tape.groupby(stratification_variable).agg(
+            count=('bal_orig', 'count'),
+            count_pct=('bal_orig', lambda x: round(x.count() / input_tape['bal_orig'].count() * 100, 3)),
+            origbal=('bal_orig', 'sum'),
+            origbal_pct=('bal_orig', lambda x: round(x.sum() / input_tape['bal_orig'].sum() * 100, 3)),
+            currbal=('bal_curr', 'sum'),
+            currbal_pct=('bal_curr', lambda x: round(x.sum() / input_tape['bal_curr'].sum() * 100, 3)),
+            factor=('bal_curr', lambda x: round(x.sum() / self.tape.loc[x.index, 'bal_orig'].sum() * 100, 3)),
+            wa_origrate=('rate_margin', origbal_weight),
+            wa_origterm=('term_orig', origbal_weight_int),
+            wa_remterm=('term_rem', currbal_weight_int),
+            wa_origfico=('fico_orig', origbal_weight_int),
+            wa_currfico=('fico_curr', currbal_weight_int),
+            wa_origltv=('uw_ltv_orig', origbal_weight),
+            wa_origcltv=('bal_orig_cum', lambda x: x.sum() / self.tape.loc[x.index, 'prop_appraisal'].sum()),
+            wa_origdti=('uw_dti_orig', origbal_weight),
+            fc_pct=('fc_status', lambda x: x.count() / (x.count() + x.isna().sum()) * 100),
+            bk_pct=('bk_status', lambda x: x.count() / (x.count() + x.isna().sum()) * 100),
+            # CA_pct=('state', lambda x: round(x.str.contains('CA').sum() / x.count() * 100, 3)),
+            # FL_pct=('state', lambda x: round(x.str.contains('FL').sum() / x.count() * 100, 3)),
+            # TX_pct=('state', lambda x: round(x.str.contains('TX').sum() / x.count() * 100, 3)),
+            top1_pct=('state', lambda x: round(x.str.contains(top_1_state).sum() / x.count() * 100, 3)),
+            top2_pct=('state', lambda x: round(x.str.contains(top_2_state).sum() / x.count() * 100, 3))
+        )
+        summary_strat.rename(columns={'top1_pct': f'{top_1_state.upper()}_pct', 'top2_pct': f'{top_2_state.upper()}_pct'}, inplace=True)
+        return summary_strat
 
     @staticmethod
     def strat_summary_consumer_open(input_tape: pd.DataFrame, stratification_variable: str, stratification_buckets: list = None) -> pd.DataFrame:
-        #Check if stratificaiton_variable is a variable in the input_tape, and then create buckets if not already given.
-        if stratification_variable in input_tape.columns and stratification_buckets is None:
-            stratification_buckets = bucketize_data(input_tape, stratification_variable)
-        elif stratification_variable in input_tape.columns and stratification_buckets is not None:
-            stratificaiton_buckets = [stratification_buckets] if type(stratification_buckets) is not list else stratification_buckets
-        elif stratification_variable not in input_tape.columns:
-            raise ValueError(f'Stratification variable {stratification_variable} not found in dataframe.')
-        else:
-            raise ValueError(f'Unknown error with stratification variable {stratification_variable}.')
-        #Calculate the top two states by count of assets in the input_tape
-        top_1_state = \
-        input_tape[['prop_state', 'count']].groupby(['prop_state']).count().sort_values(by='count', ascending=False)[
-        :1].index[0]
-        top_2_state = \
-        input_tape[['prop_state', 'count']].groupby(['prop_state']).count().sort_values(by='count', ascending=False)[
-        1:2].index[0]
 
-        origbal_wa_zero = weighted_average_factory(weights=dataframe['origbal'], zeros=0)
-        origbal_wa_zero_int = weighted_average_factory(weights=dataframe['origbal'], zeros=0, rounding=True,
-                                                       output_type='int')
-        currbal_wa_zero = weighted_average_factory(weights=dataframe['currbal'], zeros=0)
-        currbal_wa_zero_int = weighted_average_factory(weights=dataframe['currbal'], zeros=0, rounding=True,
-                                                       output_type='int')
-        origbal_wa_na = weighted_average_factory(weights=dataframe['origbal'])
-        origbal_wa_na_int = weighted_average_factory(weights=dataframe['origbal'], rounding=True, output_type='int')
-        currbal_wa_na = weighted_average_factory(weights=dataframe['currbal'])
-        currbal_wa_na_int = weighted_average_factory(weights=dataframe['currbal'], rounding=True, output_type='int')
+
 
         summary_strat = input_tape.groupby(stratification_variable).agg(
             count=('bal_orig', 'count'),
             count_pct=('bal_orig', lambda x: round(x.count() / self.tape['bal_orig'].count() * 100, 3)),
-            origbal=('bal_orig', 'sum'),
-            origbal_pct=('bal_orig', lambda x: round(x.sum() / self.tape['bal_orig'].sum() * 100, 3)),
             currbal=('bal_curr', 'sum'),
             currbal_pct=('bal_curr', lambda x: round(x.sum() / self.tape['bal_curr'].sum() * 100, 3)),
-            factor=('bal_curr', lambda x: round(x.sum() / self.tape.loc[x.index, 'bal_orig'].sum() * 100, 3)),
+            currlimit=('bal_limit_curr', 'sum'),
+            currlimit_pct=('bal_limit_curr', lambda x: round(x.sum() / self.tape['bal_limit_curr'].sum() * 100, 3)),
+            currutil=('bal_curr', lambda x: round(x.sum() / self.tape.loc[x.index, 'bal_limit_curr'].sum() * 100, 3)),
+
+
             wa_origrate=('rate_margin', origbal_wa_zero),
             wa_origterm=('term_orig', origbal_wa_zero_int),
             wa_origfico=('fico_orig', origbal_wa_zero_int),
@@ -310,13 +327,6 @@ class Stratification:
         )
         return summary_strat
 
-        summary_strat = dataframe.groupby(stratification_variable).agg()
-            # count=('bal_orig', 'count'),
-            # count_pct=('bal_orig', lambda x: round(x.count() / self.tape['bal_orig'].count() * 100, 3)),
-            # origlimit=('bal_limit_orig', 'sum'),
-            # currlimit=('bal_limit_curr', 'sum'),
-            # currbal=('bal_curr', 'sum'),
-            # currutil=('bal_curr_util', lambda x: round(self.tape.loc[x.index, 'bal_curr'].sum() / self.tape.loc[x.index, 'bal_limit_curr'].sum() * 100, 3)),
 
     
     
