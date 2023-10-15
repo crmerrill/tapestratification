@@ -261,10 +261,10 @@ class AssetVariableConfig(object):
         self.field_required = {}
         #Data Loading Procedure Calls
         if config_file is None or self.validate_config_file() is False:
-            return None
+            return self
         else:
             self.load_config()
-            return None
+            return self
 
 
     @staticmethod
