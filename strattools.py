@@ -4,37 +4,8 @@ import math
 import pandas as pd
 import numpy as np
 import varsconfig
-from CFEngine.cmutils.mathutils import round_to_nearest
-
-
-
-def weighted_average_factory(**kwargs):
-    weights = kwargs.get('weights').copy()
-    zero_values = kwargs.get('zeros')
-    rounding = kwargs.get('rounding')
-    output_type = kwargs.get('output_type')
-    def weighted_average(values):
-        try:
-            if zero_values is None or str(zero_values).lower() in ('na', 'nan', 'none', 'null'):
-                values_mask = ~np.isnan(values)
-                if all(v is False for v in values_mask):
-                    raise ValueError('there are no non-missing x variable values')
-            else:
-                values = values.fillna(zero_values)
-                values_mask = ~np.isnan(values)
-            weight = weights.loc[values.index]
-            if rounding is True and output_type == 'int':
-                return int(np.round(np.average(values[values_mask], weights=weight[values_mask]), 0))
-            elif rounding is True:
-                return np.round(np.average(values[values_mask], weights=weight[values_mask]), 0)
-            else:
-                return np.average(values[values_mask], weights=weight[values_mask])
-        except ZeroDivisionError:
-            if values.sum() != 0:
-                return np.average(values)
-            else:
-                return 'NA'
-    return weighted_average
+from cmutils.mathutils import round_to_nearest
+from cmutils.mathutils import pandas_weighted_average_factory
 
 
 def bucketize_data(dataframe: pd.DataFrame, variable: str, max_buckets: int = 10, **kwargs) -> list:
@@ -104,7 +75,6 @@ def bucketize_data(dataframe: pd.DataFrame, variable: str, max_buckets: int = 10
             return [bottom_bucket + step_size * i for i in range(max_buckets + 1)]
 
 
-
 class Stratification:
 
     # def __new__(cls, *args, **kwargs):
@@ -114,17 +84,22 @@ class Stratification:
     #
 
 
-    def __init__(self, tape, variable, **kwargs):
-        self.tape_type=None
-        self.stratify_by = variable
-        self.reload_tape(tape)
-        self.reload_buckets(variable, **kwargs)
+    def __init__(self, input_tape: pd.DataFrame, asset_class: str, stratify_by_variable: str, **kwargs) -> None:
+        self.tape = None
+        self.tape_type=asset_class
+        self.stratify_by = stratify_by_variable
+        self.reload_tape(input_tape)
+        self.reload_buckets(stratify_by_variable, **kwargs)
+        self.reload_weighted_average_factories(**kwargs)
+
+    def reload_tape(self, input_tape: pd.DataFrame = None):
+        if input_tape is None or input_tape.empty or self.tape_type not in input_tape['asset_sector'].unique():
+            raise ValueError(f'Input tape is empty or does not contain the asset class {self.tape_type}')
+        else:
+            self.tape = input_tape[input_tape['asset_sector']==self.tape_type].set_index('asset_id', inplace=True)
+        return self
 
 
-    def reload_tape(self, input_tape: pd.DataFrame = self.tape):
-        self.tape = input_tape[input_tape['asset_sector']==self.tape_type].set_index('asset_id', inplace=True)
-
-    
     def reload_buckets(self, stratify_by_variable: str = self.stratify_by, **kwargs):
         self.stratify_by = stratify_by_variable
         self.buckets = kwargs.get(f'buckets_{self.tape_type}',
@@ -132,6 +107,20 @@ class Stratification:
                                                                kwargs.get('buckets', 
                                                                           bucketize_data(self.tape, self.stratify_by))))
 
+    def reload_weighted_average_factories(self, **kwargs):
+        """
+        Reloads the weighted average functions for the stratification object.  This is required when the tape is reloaded
+        :param kwargs: wa_zeros: this determines how zeros are handled.
+                        If an integer is used, then the integer will replace empty or zero values.
+                        Other options are ('na', 'nan', 'none', 'null') which will skip the value in the calculation
+        :return: None
+        """
+        self._origbal_wa_zero = pandas_weighted_average_factory(weights=self.tape['bal_orig'], zeros=kwargs.get('wa_zeros', 0))
+        self._origbal_wa_zero_int = pandas_weighted_average_factory(weights=self.tape['bal_orig'], zeros=kwargs.get('wa_zeros', 0), rounding=True, output_type='int')
+        self._currbal_wa_zero = pandas_weighted_average_factory(weights=self.tape['bal_curr'], zeros=kwargs.get('wa_zeros', 0))
+        self._currbal_wa_zero_int = pandas_weighted_average_factory(weights=self.tape['bal_curr'], zeros=kwargs.get('wa_zeros', 0), rounding=True, output_type='int')
+        self._currlimit_wa_zero = pandas_weighted_average_factory(weights=self.tape['bal_limit_curr'], zeros=kwargs.get('wa_zeros', 0))
+        self._currlimit_wa_zero_int = pandas_weighted_average_factory(weights=self.tape['bal_limit_curr'], zeros=kwargs.get('wa_zeros', 0), rounding=True, output_type='int')
 
     @staticmethod
     def strat_summary_consumer_closed(input_tape: pd.DataFrame, stratification_variable: str, stratification_buckets: list, **kwargs) -> pd.DataFrame:
@@ -143,10 +132,14 @@ class Stratification:
             raise ValueError(f'Not all required fields are present in the input_tape.  Required fields are: {required_fields}')
 
         #Create the weighted average functions requried for dataframe summary
-        origbal_weight = weighted_average_factory(weights=input_tape['origbal'], zeros=kwargs.get('zeros', 0))
-        origbal_weight_int = weighted_average_factory(weights=input_tape['origbal'], zeros=kwargs.get('zeros', 0), rounding=True, output_type='int')
-        currbal_weight = weighted_average_factory(weights=input_tape['currbal'], zeros=kwargs.get('zeros', 0))
-        currbal_weight_int = weighted_average_factory(weights=input_tape['currbal'], zeros=kwargs.get('zeros', 0), rounding=True, output_type='int')
+        origbal_weight = pandas_weighted_average_factory(weights=input_tape['origbal'], zeros=kwargs.get('zeros', 0))
+        origbal_weight_int = pandas_weighted_average_factory(weights=input_tape['origbal'],
+                                                             zeros=kwargs.get('zeros', 0), rounding=True,
+                                                             output_type='int')
+        currbal_weight = pandas_weighted_average_factory(weights=input_tape['currbal'], zeros=kwargs.get('zeros', 0))
+        currbal_weight_int = pandas_weighted_average_factory(weights=input_tape['currbal'],
+                                                             zeros=kwargs.get('zeros', 0), rounding=True,
+                                                             output_type='int')
 
         #Calculate teh top two stated by count of assets in the input_tape
         top_1_state = input_tape[['prop_state', 'count']].groupby(['prop_state']).count().sort_values(by='count', ascending=False)[:1].index[0]
@@ -191,12 +184,14 @@ class Stratification:
                 f'Not all required fields are present in the input_tape.  Required fields are: {required_fields}')
 
         # Create the weighted average functions requried for dataframe summary
-        currbal_weight = weighted_average_factory(weights=input_tape['bal_curr'], zeros=kwargs.get('zeros', 0))
-        currbal_weight_int = weighted_average_factory(weights=input_tape['bal_curr'], zeros=kwargs.get('zeros', 0),
-                                                      rounding=True, output_type='int')
-        currlimit_weight = weighted_average_factory(weights=input_tape['origbal'], zeros=kwargs.get('zeros', 0))
-        currlimit_weight_int = weighted_average_factory(weights=input_tape['origbal'], zeros=kwargs.get('zeros', 0),
-                                                      rounding=True, output_type='int')
+        currbal_weight = pandas_weighted_average_factory(weights=input_tape['bal_curr'], zeros=kwargs.get('zeros', 0))
+        currbal_weight_int = pandas_weighted_average_factory(weights=input_tape['bal_curr'],
+                                                             zeros=kwargs.get('zeros', 0), rounding=True,
+                                                             output_type='int')
+        currlimit_weight = pandas_weighted_average_factory(weights=input_tape['origbal'], zeros=kwargs.get('zeros', 0))
+        currlimit_weight_int = pandas_weighted_average_factory(weights=input_tape['origbal'],
+                                                               zeros=kwargs.get('zeros', 0), rounding=True,
+                                                               output_type='int')
 
         # Calculate teh top two stated by count of assets in the input_tape
         top_1_state = \
