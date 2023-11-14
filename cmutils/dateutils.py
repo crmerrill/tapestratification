@@ -1,6 +1,7 @@
 # This file contains a list of standard date management functions that are needed for various calculations
 
 import datetime
+
 import numpy as np
 import pandas as pd
 from numba import jit
@@ -176,7 +177,6 @@ def daysbeforedate_array(array):
 
 # --BEGIN: Day Count Calculators
 
-@jit
 def days360diff(start_date, end_date, method='NASD'):
     """
     Parameters:
@@ -219,18 +219,15 @@ def days360diff(start_date, end_date, method='NASD'):
         FOR MORE INFORMATION SEE: https://www.isda.org/2008/12/22/30-360-day-count-conventions/
 
     """
-    # Some quick error handling for wrong date types or orders
-    start_date_ = pd.Timestamp(start_date)
-    end_date_ = pd.Timestamp(end_date)
+    if not (isinstance(start_date, datetime.date) or isinstance(end_date, datetime.date)):
+        raise TypeError('Start and End Dates must be datetime.date objects')
+    # some quick error handling if dates are reversed
     _x = 1
     if start_date > end_date:
         print('Start Date is after End Date')
         _x = -1
-        start_date = pd.Timestamp(end_date_)
-        end_date = pd.Timestamp(start_date_)
-    else:
-        start_date = start_date_
-        end_date = end_date_
+        start_date = end_date
+        end_date = start_date
     # Break apart components of the dates for processing
     sd = start_date.day
     sm = start_date.month
@@ -238,7 +235,7 @@ def days360diff(start_date, end_date, method='NASD'):
     ed = end_date.day
     em = end_date.month
     ey = end_date.year
-    datediff_ = 0
+    datediff = 0
     # Adjust the start date and end date based on selected method
     if method == 'ISDA':
         if sd == 31:

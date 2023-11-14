@@ -4,7 +4,7 @@
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 
 import varsconfig
-import tape
+import tapetools
 import strattools
 import os
 import sys

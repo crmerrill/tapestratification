@@ -469,6 +469,7 @@ class TestNewAssetVariableConfig(unittest.TestCase):
         self.config_path_bad_header.touch()
         self.config_path_bad_datatypes.touch()
         self.config_path_bad_datavalues.touch()
+        # NOTE: DO NOT TOUCH DEFAULT_CONFIG_FILE.  IT IS A PRE EXISTING FILE THAT SHOULD NOT BE MODIFIED.
 
         self.good_header = ['FieldName',
                             'DataDesc',

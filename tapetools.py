@@ -3,11 +3,12 @@ import datetime as dt
 import numpy as np
 import numpy_financial as npf
 import pandas as pd
-import CFEngine.cmutils.sysutils as sysutils
+import pandera as pda
+import cmutils.sysutils as sysutils
 import varsconfig as config
 from IPython.display import HTML, display
 
-def import_raw_data(tape_file_path: str, header_map: (str, dict) = None, **kwargs) -> pd.DataFrame:
+def import_raw_datatape(tape_file_path: str, header_map: (str, dict) = None, **kwargs) -> pd.DataFrame:
     """
     Import raw tape file of multiple format types into a pandas dataframe, with option to remap header names.
     :param str tape_file_path: path to tape file.  File type can be csv, tsv, txt, xlsx, xls, or sql_query=<query>.
@@ -65,12 +66,12 @@ def import_raw_data(tape_file_path: str, header_map: (str, dict) = None, **kwarg
         tape_data = tape_data.rename(columns=header_map)
     elif header_map.lower().endswith('.tsv') or header_map.lower().endswith('.txt'):
         header_map = pd.read_csv(header_map, header=0, index_col=0,
-                                 delimiter=kwargs.get('header_delimiter', ',')).to_dict()['mapped_field']
+                                 delimiter=kwargs.get('header_delimiter', '\t')).to_dict()['mapped_field']
         tape_data = tape_data.rename(columns=header_map)
-    elif header_map.lower().endswith('.xlsx'):
+    elif header_map.lower().endswith('.xlsx') or header_map.lower().endswith('.xls'):
         header_map = pd.read_excel(header_map, header=0, index_col=0,
                                    sheet_name=kwargs.get('header_sheet_name',0)).to_dict()['mapped_field']
-        tape_data = tape_data.rename(columns=header_map)
+        tape_data = tape_data.rename(columns=header_map, inplace=True)
     else:
         raise ImportWarning('Unsupported header file input.  Header must be dictionary or flat file format')
     return tape_data
@@ -107,7 +108,7 @@ def _get_unique_values_dict(data_tape: pd.DataFrame, **kwargs) -> dict:
     return unique_values
 
 
-def tape_unique_values(data_tape: pd.DataFrame) -> pd.DataFrame:
+def summarize_unique_values(data_tape: pd.DataFrame) -> pd.DataFrame:
     """
     Provides a summary of unique values for each column in data tape
     :param pd.DataFrame data_tape: data tape to analyze
@@ -124,7 +125,7 @@ def tape_unique_values(data_tape: pd.DataFrame) -> pd.DataFrame:
     })
 
 
-def tape_summary(data_tape: pd.DataFrame) -> pd.DataFrame:
+def summarize_tape(data_tape: pd.DataFrame) -> pd.DataFrame:
     """
     Provides a detailed summary of descriptive statistics for each column in data tape
     :param pd.DataFrame data_tape:  data tape to analyze
@@ -148,26 +149,26 @@ def tape_summary(data_tape: pd.DataFrame) -> pd.DataFrame:
     })
 
 
-def check_required_fields(data_tape: pd.DataFrame, config_data: config.AssetVariableConfig) -> (bool, list):
+def check_required_tape_fields(data_tape: pd.DataFrame, config_data: config.AssetVariableConfig) -> (bool, list):
     """Checks to see if all required fields from a configueration object are contained in the data tape
     :param data_tape: pandas dataframe of data tape
     :param config_data: AssetVariableConfig configuration object
     :return: True if all required fields are contained in data tape, False if not
     """
-    missing = False
+    missing_bool = False
     missing_fields = []
     for field in config_data.required_fields:
         if field not in data_tape.columns:
             print(f'Required field {field} is not contained in data tape.  Please check data tape fields')
             missing_fields.append(field)
-            missing = True
+            missing_bool = True
         else:
             pass
-    return not missing, missing_fields
+    return not missing_bool, missing_fields
 
 
 def process_to_clean_tape(data_tape, config_data):
-    if check_required_fields(data_tape, config_data)[0] is True:
+    if check_required_tape_fields(data_tape, config_data)[0] is True:
         for variable in config_data:
             if variable in self.tape_data.columns:
                 self.tape_data[variable] = self.tape_data[variable].apply(self._converter_dict[variable])

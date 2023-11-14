@@ -27,6 +27,7 @@ class AssetVariableConfig(object):
                                 'GenericLoan': (str, ('true', 'false')),
                                 'ConsumerLoan': (str, ('', 'none', 'true', 'false')),
                                 'ConsumerMortgage': (str, ('', 'none', 'true', 'false')),
+                                'ConsumerHELOC': (str, ('', 'none', 'true', 'false')),
                                 'ConsumerAuto': (str, ('', 'none', 'true', 'false')),
                                 'ConsumerStudent': (str, ('', 'none', 'true', 'false')),
                                 'ConsumerCard': (str, ('', 'none', 'true', 'false')),
@@ -37,11 +38,13 @@ class AssetVariableConfig(object):
                                 'CommercialBullet': (str, ('', 'none', 'true', 'false')),
                                 'CommercialRevolver': (str, ('', 'none', 'true', 'false')),
                                 'CommercialABL': (str, ('', 'none', 'true', 'false')),
-                                'Required': (str, ('true', 'false'))
+                                'CommercialCard': (str, ('', 'none', 'true', 'false')),
+                                'CommercialAuto': (str, ('', 'none', 'true', 'false')),
+                                'CommercialEquipment': (str, ('', 'none', 'true', 'false')),
                                 }
 
     
-    _required_config_field_number = 35
+    _required_config_field_number = 26
 
     @staticmethod
     def convert_bools(var):
@@ -241,7 +244,7 @@ class AssetVariableConfig(object):
     def __init__(self, config_file=None):
         #Configueration Meta Data
         self.config_file = config_file
-        self.config_date = datetime.datetime.today()
+        self.config_date = datetime.datetime.now()
         #Configueration Data
         self.strs = []
         self.dates = []
@@ -251,17 +254,16 @@ class AssetVariableConfig(object):
         self.arrays = []
         self._type_dict = {}
         self._converter_dict = {}
-        self.base_fields = []
-        self.consumer_fields = []
         self.consumer_mortgage_fields = []
         self.consumer_auto_fields = []
         self.consumer_student_fields = []
         self.consumer_unsecured_fields = []
         self.consumer_creditcard_fields = []
-        self.commercial_fields = []
         self.commercial_mortgage_fields = []
-        self.stratification_fields = {}
-        self.field_required = {}
+        self.stratify_by_fields = []
+        self.stratify_summary_fields = {}
+        self.tape_schema = None
+
         #Data Loading Procedure Calls
         if config_file is None or self.validate_config_file() is False:
             return self
@@ -315,8 +317,10 @@ class AssetVariableConfig(object):
         if AssetVariableConfig._check_config_file_exists(self.config_file) is True:
             if AssetVariableConfig._check_config_file_header(self.config_file) is True:
                 return AssetVariableConfig._check_config_file_data(self.config_file)
+            else:
+                return False
+        else:
             return False
-        return False
 
 
     def load_config(self):
