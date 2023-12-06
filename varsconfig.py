@@ -9,7 +9,7 @@ class AssetVariableConfig(object):
 
     _required_config_fields = {'FieldName': (str, None),
                                 'DataDesc': (str, ('uniqueid','categorical', 'numeric', 'date', 'flag')),
-                                'DataCategory': (str, ('strs', 'floats', 'ints', 'dates', 'bools', 'arrays')),
+                                'DataCategory': (str, ('strs', 'floats', 'ints', 'dates', 'bools', 'arrays', None)),
                                 'DataType': (str, ('str', 'enum', 'datetime.date', 'list', 'tuple', 'bool', 'np.bool_' 
                                                     'int', 'np.integer', 'np.int8', 'np.byte', 'np.int16', 'np.short',
                                                     'np.int32', 'np.intc', 'np.int_', 'np.int64', 'np.long', 'np.longlong',
@@ -395,5 +395,4 @@ class AssetVariableConfig(object):
         else:
             return self._converter_dict
 
-
-
+    def output_varsconfig_flat_file(self):

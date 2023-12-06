@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/default_config2.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/test1datadict.csv">
           <value>
             <Attribute>
