@@ -231,38 +231,38 @@ class Stratification:
     
     
     
-    def strat_summary_extended(self):
-        summary_extended_strat = dataframe.groupby(stratification_variable).agg(
-            count=('bal_orig', 'count'),
-            count_pct=('bal_orig', lambda x: round(x.count() / self.tape['bal_orig'].count() * 100, 3)),
-            origbal=('bal_orig', 'sum'),
-            origbal_pct=('bal_orig', lambda x: round(x.sum() / self.tape['bal_orig'].sum() * 100, 3)),
-            currbal=('bal_curr', 'sum'),
-            currbal_pct=('bal_curr', lambda x: round(x.sum() / self.tape['bal_curr'].sum() * 100, 3))
-            
-            term_orig=('term_orig', origbal_wa_zero_int),
-            term_rem=('term_rem', currbal_wa_zero_int),
-
-            margin=('rate_margin', origbal_wa_zero),
-            currrate=('rate_curr', currbal_wa_zero),
-
-
-            fico_orig_1=('fico_orig', origbal_wa_zero_int),
-            fico_orig_2=('fico_orig_borrower2', origbal_wa_zero_int),
-
-            fico_curr_1=('fico_curr', origbal_wa_zero_int),
-            fico_curr_2=('fico_curr_borrower2', origbal_wa_zero_int),
-            income_stated=('uw_inc_stated', origbal_wa_zero_int)
-            income_verified=('uw_inc_verify', origbal_wa_zero_int)
-            dti_orig
-            dti_curr
-            prop_value
-            prop_value_age
-            ltv_orig
-            ltv_curr
-            cltv_orig
-            cltv_curr
-        )
+    # def strat_summary_extended(self):
+    #     summary_extended_strat = dataframe.groupby(stratification_variable).agg(
+    #         count=('bal_orig', 'count'),
+    #         count_pct=('bal_orig', lambda x: round(x.count() / self.tape['bal_orig'].count() * 100, 3)),
+    #         origbal=('bal_orig', 'sum'),
+    #         origbal_pct=('bal_orig', lambda x: round(x.sum() / self.tape['bal_orig'].sum() * 100, 3)),
+    #         currbal=('bal_curr', 'sum'),
+    #         currbal_pct=('bal_curr', lambda x: round(x.sum() / self.tape['bal_curr'].sum() * 100, 3))
+    #
+    #         term_orig=('term_orig', origbal_wa_zero_int),
+    #         term_rem=('term_rem', currbal_wa_zero_int),
+    #
+    #         margin=('rate_margin', origbal_wa_zero),
+    #         currrate=('rate_curr', currbal_wa_zero),
+    #
+    #
+    #         fico_orig_1=('fico_orig', origbal_wa_zero_int),
+    #         fico_orig_2=('fico_orig_borrower2', origbal_wa_zero_int),
+    #
+    #         fico_curr_1=('fico_curr', origbal_wa_zero_int),
+    #         fico_curr_2=('fico_curr_borrower2', origbal_wa_zero_int),
+    #         income_stated=('uw_inc_stated', origbal_wa_zero_int)
+    #         income_verified=('uw_inc_verify', origbal_wa_zero_int)
+    #         dti_orig
+    #         dti_curr
+    #         prop_value
+    #         prop_value_age
+    #         ltv_orig
+    #         ltv_curr
+    #         cltv_orig
+    #         cltv_curr
+    #     )
         pass
 
     def strat_performance(self):
@@ -340,13 +340,13 @@ class ConsumerUnsecuredStratification(Stratification):
 
 
 
-class Stratification_Package:
-    def __init__(self, data_tape: pd.DataFrame, config: varsconfig.AssetVariableConfig):
-        self.tape = data_tape
-        self.stratification_variables = [x for x in config.stratification_variables if x in self.tape.columns]
-
-
-
-
-    def summary_package(self, **kwargs):
-        pass
+# class Stratification_Package:
+#     def __init__(self, data_tape: pd.DataFrame, config: varsconfig.AssetVariableConfig):
+#         self.tape = data_tape
+#         self.stratification_variables = [x for x in config.stratification_variables if x in self.tape.columns]
+#
+#
+#
+#
+#     def summary_package(self, **kwargs):
+#         pass

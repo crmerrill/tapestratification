@@ -395,4 +395,4 @@ class AssetVariableConfig(object):
         else:
             return self._converter_dict
 
-    def output_varsconfig_flat_file(self):
+    # def output_varsconfig_flat_file(self):

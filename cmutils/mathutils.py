@@ -52,7 +52,7 @@ def geometric_mean(x: np.array) -> float:
     """
     return np.prod(x) ** (1/len(x))
 
-def pandas_weighted_average_factory(**kwargs) -> function:
+def pandas_weighted_average_factory(**kwargs) -> object:
     weights = kwargs.get('weights').copy()
     zero_values = kwargs.get('zeros')
     rounding = kwargs.get('rounding')
